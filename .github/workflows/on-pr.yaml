@@ -1,0 +1,14 @@
+name: Verify and test services
+permissions:
+  contents: read
+  checks: write
+on:
+  - pull_request
+jobs:
+  verify-services:
+    name: Verify services
+    uses: ./.github/workflows/pipeline-verify.yaml
+
+  test-services:
+    name: Test services
+    uses: ./.github/workflows/pipeline-test.yaml

@@ -1,0 +1,59 @@
+package device
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/emil-j-olsson/ubiquiti/backend/internal/types"
+)
+
+var _ = []Client{(*ClientGrpc)(nil), (*ClientHttp)(nil)}
+
+const (
+	DefaultClientTimeout     = 3 * time.Second
+	DefaultClientIdleTimeout = 30 * time.Second
+)
+
+var (
+	ErrorUnsupportedProtocol = fmt.Errorf("unsupported device client protocol")
+	ErrorClientCreation      = fmt.Errorf("failed to create device client")
+	ErrorNotFound            = fmt.Errorf("not found")
+)
+
+type Client interface {
+	GetHealth(ctx context.Context) (*types.DeviceHealthStatus, error)
+	GetDiagnostics(ctx context.Context) (*types.DeviceDiagnostics, error)
+	StreamDiagnostics(ctx context.Context) (<-chan *types.DeviceDiagnostics, <-chan error)
+	UpdateDevice(ctx context.Context, status types.DeviceStatus) error
+	Close() error
+}
+
+type ChecksumGenerator interface {
+	GenerateChecksum(ctx context.Context, data []byte) (string, error)
+}
+
+type Config struct {
+	Protocol types.Protocol
+	Host     string
+	Port     int64
+}
+
+// Device Client Factory
+type factory struct {
+	generator ChecksumGenerator
+}
+
+func NewClientFactory(generator ChecksumGenerator) *factory {
+	return &factory{generator: generator}
+}
+
+func (f *factory) CreateClient(config Config) (Client, error) {
+	if config.Protocol.IsGrpc() {
+		return NewClientGrpc(config, f.generator)
+	}
+	if config.Protocol.IsHttp() {
+		return NewClientHttp(config, f.generator), nil
+	}
+	return nil, fmt.Errorf("%w: %s", ErrorUnsupportedProtocol, config.Protocol.String())
+}
