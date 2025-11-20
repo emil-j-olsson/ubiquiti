@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package device.v1;
+option go_package = "github.com/emil-j-olsson/ubiquiti/device/proto/device/v1;devicev1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+service Device {
+    rpc GetHealth(GetHealthRequest) returns (GetHealthResponse) {
+        option (google.api.http) = {
+            get: "/v1/health"
+        };
+    }
+    rpc GetDiagnostics(GetDiagnosticsRequest) returns (DiagnosticsResponse) {
+        option (google.api.http) = {
+            get: "/v1/diagnostics"
+        };
+    }
+    rpc StreamDiagnostics(GetDiagnosticsRequest) returns (stream DiagnosticsResponse) {
+        option (google.api.http) = {
+            get: "/v1/diagnostics/stream"
+        };
+    }
+    rpc UpdateDeviceState(UpdateDeviceStateRequest) returns (UpdateDeviceStateResponse) {
+        option (google.api.http) = {
+            patch: "/v1/device/state"
+            body: "*"
+        };
+    }
+}
+
+enum DeviceStatus {
+    DEVICE_STATUS_UNSPECIFIED = 0;
+    DEVICE_STATUS_HEALTHY = 1;
+    DEVICE_STATUS_DEGRADED = 2;
+    DEVICE_STATUS_ERROR = 3;
+    DEVICE_STATUS_MAINTENANCE = 4;
+    DEVICE_STATUS_BOOTING = 5;
+}
+
+message GetHealthRequest {}
+
+message GetHealthResponse {
+    google.protobuf.Timestamp timestamp = 1;
+    string device_id = 2;
+    repeated string supported_protocols = 3;
+    string architecture = 4;
+    string os = 5;
+}
+
+message GetDiagnosticsRequest {}
+
+message DiagnosticsResponse {
+    google.protobuf.Timestamp timestamp = 1;
+    string device_id = 2;
+    string hardware_version = 3;
+    string software_version = 4;
+    string firmware_version = 5;
+    double cpu_usage = 6;
+    double memory_usage = 7;
+    DeviceStatus device_status = 8;
+    string checksum = 9;
+}
+
+message UpdateDeviceStateRequest {
+    string device_id = 1;
+    DeviceStatus device_status = 2;
+}
+
+message UpdateDeviceStateResponse {}
