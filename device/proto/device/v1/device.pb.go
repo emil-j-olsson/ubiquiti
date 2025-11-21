@@ -7,13 +7,14 @@
 package devicev1
 
 import (
+	reflect "reflect"
+	sync "sync"
+	unsafe "unsafe"
+
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
-	reflect "reflect"
-	sync "sync"
-	unsafe "unsafe"
 )
 
 const (
@@ -22,6 +23,55 @@ const (
 	// Verify that runtime/protoimpl is sufficiently up-to-date.
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
+
+type Protocol int32
+
+const (
+	Protocol_PROTOCOL_UNSPECIFIED Protocol = 0
+	Protocol_PROTOCOL_HTTP        Protocol = 1
+	Protocol_PROTOCOL_GRPC        Protocol = 2
+)
+
+// Enum value maps for Protocol.
+var (
+	Protocol_name = map[int32]string{
+		0: "PROTOCOL_UNSPECIFIED",
+		1: "PROTOCOL_HTTP",
+		2: "PROTOCOL_GRPC",
+	}
+	Protocol_value = map[string]int32{
+		"PROTOCOL_UNSPECIFIED": 0,
+		"PROTOCOL_HTTP":        1,
+		"PROTOCOL_GRPC":        2,
+	}
+)
+
+func (x Protocol) Enum() *Protocol {
+	p := new(Protocol)
+	*p = x
+	return p
+}
+
+func (x Protocol) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (Protocol) Descriptor() protoreflect.EnumDescriptor {
+	return file_proto_device_v1_device_proto_enumTypes[0].Descriptor()
+}
+
+func (Protocol) Type() protoreflect.EnumType {
+	return &file_proto_device_v1_device_proto_enumTypes[0]
+}
+
+func (x Protocol) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use Protocol.Descriptor instead.
+func (Protocol) EnumDescriptor() ([]byte, []int) {
+	return file_proto_device_v1_device_proto_rawDescGZIP(), []int{0}
+}
 
 type DeviceStatus int32
 
@@ -65,11 +115,11 @@ func (x DeviceStatus) String() string {
 }
 
 func (DeviceStatus) Descriptor() protoreflect.EnumDescriptor {
-	return file_proto_device_v1_device_proto_enumTypes[0].Descriptor()
+	return file_proto_device_v1_device_proto_enumTypes[1].Descriptor()
 }
 
 func (DeviceStatus) Type() protoreflect.EnumType {
-	return &file_proto_device_v1_device_proto_enumTypes[0]
+	return &file_proto_device_v1_device_proto_enumTypes[1]
 }
 
 func (x DeviceStatus) Number() protoreflect.EnumNumber {
@@ -78,7 +128,7 @@ func (x DeviceStatus) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use DeviceStatus.Descriptor instead.
 func (DeviceStatus) EnumDescriptor() ([]byte, []int) {
-	return file_proto_device_v1_device_proto_rawDescGZIP(), []int{0}
+	return file_proto_device_v1_device_proto_rawDescGZIP(), []int{1}
 }
 
 type GetHealthRequest struct {
@@ -119,9 +169,9 @@ func (*GetHealthRequest) Descriptor() ([]byte, []int) {
 
 type GetHealthResponse struct {
 	state              protoimpl.MessageState `protogen:"open.v1"`
-	Timestamp          *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	UpdatedAt          *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	DeviceId           string                 `protobuf:"bytes,2,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
-	SupportedProtocols []string               `protobuf:"bytes,3,rep,name=supported_protocols,json=supportedProtocols,proto3" json:"supported_protocols,omitempty"`
+	SupportedProtocols []Protocol             `protobuf:"varint,3,rep,packed,name=supported_protocols,json=supportedProtocols,proto3,enum=device.v1.Protocol" json:"supported_protocols,omitempty"`
 	Architecture       string                 `protobuf:"bytes,4,opt,name=architecture,proto3" json:"architecture,omitempty"`
 	Os                 string                 `protobuf:"bytes,5,opt,name=os,proto3" json:"os,omitempty"`
 	unknownFields      protoimpl.UnknownFields
@@ -158,9 +208,9 @@ func (*GetHealthResponse) Descriptor() ([]byte, []int) {
 	return file_proto_device_v1_device_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *GetHealthResponse) GetTimestamp() *timestamppb.Timestamp {
+func (x *GetHealthResponse) GetUpdatedAt() *timestamppb.Timestamp {
 	if x != nil {
-		return x.Timestamp
+		return x.UpdatedAt
 	}
 	return nil
 }
@@ -172,7 +222,7 @@ func (x *GetHealthResponse) GetDeviceId() string {
 	return ""
 }
 
-func (x *GetHealthResponse) GetSupportedProtocols() []string {
+func (x *GetHealthResponse) GetSupportedProtocols() []Protocol {
 	if x != nil {
 		return x.SupportedProtocols
 	}
@@ -193,26 +243,26 @@ func (x *GetHealthResponse) GetOs() string {
 	return ""
 }
 
-type GetDiagnosticsRequest struct {
+type DiagnosticsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetDiagnosticsRequest) Reset() {
-	*x = GetDiagnosticsRequest{}
+func (x *DiagnosticsRequest) Reset() {
+	*x = DiagnosticsRequest{}
 	mi := &file_proto_device_v1_device_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetDiagnosticsRequest) String() string {
+func (x *DiagnosticsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetDiagnosticsRequest) ProtoMessage() {}
+func (*DiagnosticsRequest) ProtoMessage() {}
 
-func (x *GetDiagnosticsRequest) ProtoReflect() protoreflect.Message {
+func (x *DiagnosticsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_proto_device_v1_device_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -224,8 +274,8 @@ func (x *GetDiagnosticsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetDiagnosticsRequest.ProtoReflect.Descriptor instead.
-func (*GetDiagnosticsRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use DiagnosticsRequest.ProtoReflect.Descriptor instead.
+func (*DiagnosticsRequest) Descriptor() ([]byte, []int) {
 	return file_proto_device_v1_device_proto_rawDescGZIP(), []int{2}
 }
 
@@ -337,28 +387,27 @@ func (x *DiagnosticsResponse) GetChecksum() string {
 	return ""
 }
 
-type UpdateDeviceStateRequest struct {
+type UpdateDeviceRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	DeviceId      string                 `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
-	DeviceStatus  DeviceStatus           `protobuf:"varint,2,opt,name=device_status,json=deviceStatus,proto3,enum=device.v1.DeviceStatus" json:"device_status,omitempty"`
+	DeviceStatus  DeviceStatus           `protobuf:"varint,1,opt,name=device_status,json=deviceStatus,proto3,enum=device.v1.DeviceStatus" json:"device_status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UpdateDeviceStateRequest) Reset() {
-	*x = UpdateDeviceStateRequest{}
+func (x *UpdateDeviceRequest) Reset() {
+	*x = UpdateDeviceRequest{}
 	mi := &file_proto_device_v1_device_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UpdateDeviceStateRequest) String() string {
+func (x *UpdateDeviceRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdateDeviceStateRequest) ProtoMessage() {}
+func (*UpdateDeviceRequest) ProtoMessage() {}
 
-func (x *UpdateDeviceStateRequest) ProtoReflect() protoreflect.Message {
+func (x *UpdateDeviceRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_proto_device_v1_device_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -370,45 +419,38 @@ func (x *UpdateDeviceStateRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UpdateDeviceStateRequest.ProtoReflect.Descriptor instead.
-func (*UpdateDeviceStateRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use UpdateDeviceRequest.ProtoReflect.Descriptor instead.
+func (*UpdateDeviceRequest) Descriptor() ([]byte, []int) {
 	return file_proto_device_v1_device_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *UpdateDeviceStateRequest) GetDeviceId() string {
-	if x != nil {
-		return x.DeviceId
-	}
-	return ""
-}
-
-func (x *UpdateDeviceStateRequest) GetDeviceStatus() DeviceStatus {
+func (x *UpdateDeviceRequest) GetDeviceStatus() DeviceStatus {
 	if x != nil {
 		return x.DeviceStatus
 	}
 	return DeviceStatus_DEVICE_STATUS_UNSPECIFIED
 }
 
-type UpdateDeviceStateResponse struct {
+type UpdateDeviceResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UpdateDeviceStateResponse) Reset() {
-	*x = UpdateDeviceStateResponse{}
+func (x *UpdateDeviceResponse) Reset() {
+	*x = UpdateDeviceResponse{}
 	mi := &file_proto_device_v1_device_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UpdateDeviceStateResponse) String() string {
+func (x *UpdateDeviceResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdateDeviceStateResponse) ProtoMessage() {}
+func (*UpdateDeviceResponse) ProtoMessage() {}
 
-func (x *UpdateDeviceStateResponse) ProtoReflect() protoreflect.Message {
+func (x *UpdateDeviceResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_proto_device_v1_device_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -420,8 +462,8 @@ func (x *UpdateDeviceStateResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UpdateDeviceStateResponse.ProtoReflect.Descriptor instead.
-func (*UpdateDeviceStateResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use UpdateDeviceResponse.ProtoReflect.Descriptor instead.
+func (*UpdateDeviceResponse) Descriptor() ([]byte, []int) {
 	return file_proto_device_v1_device_proto_rawDescGZIP(), []int{5}
 }
 
@@ -430,14 +472,15 @@ var File_proto_device_v1_device_proto protoreflect.FileDescriptor
 const file_proto_device_v1_device_proto_rawDesc = "" +
 	"\n" +
 	"\x1cproto/device/v1/device.proto\x12\tdevice.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x12\n" +
-	"\x10GetHealthRequest\"\xcf\x01\n" +
-	"\x11GetHealthResponse\x128\n" +
-	"\ttimestamp\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\x12\x1b\n" +
-	"\tdevice_id\x18\x02 \x01(\tR\bdeviceId\x12/\n" +
-	"\x13supported_protocols\x18\x03 \x03(\tR\x12supportedProtocols\x12\"\n" +
+	"\x10GetHealthRequest\"\xe5\x01\n" +
+	"\x11GetHealthResponse\x129\n" +
+	"\n" +
+	"updated_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x1b\n" +
+	"\tdevice_id\x18\x02 \x01(\tR\bdeviceId\x12D\n" +
+	"\x13supported_protocols\x18\x03 \x03(\x0e2\x13.device.v1.ProtocolR\x12supportedProtocols\x12\"\n" +
 	"\farchitecture\x18\x04 \x01(\tR\farchitecture\x12\x0e\n" +
-	"\x02os\x18\x05 \x01(\tR\x02os\"\x17\n" +
-	"\x15GetDiagnosticsRequest\"\x87\x03\n" +
+	"\x02os\x18\x05 \x01(\tR\x02os\"\x14\n" +
+	"\x12DiagnosticsRequest\"\x87\x03\n" +
 	"\x13DiagnosticsResponse\x128\n" +
 	"\ttimestamp\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\x12\x1b\n" +
 	"\tdevice_id\x18\x02 \x01(\tR\bdeviceId\x12)\n" +
@@ -447,24 +490,28 @@ const file_proto_device_v1_device_proto_rawDesc = "" +
 	"\tcpu_usage\x18\x06 \x01(\x01R\bcpuUsage\x12!\n" +
 	"\fmemory_usage\x18\a \x01(\x01R\vmemoryUsage\x12<\n" +
 	"\rdevice_status\x18\b \x01(\x0e2\x17.device.v1.DeviceStatusR\fdeviceStatus\x12\x1a\n" +
-	"\bchecksum\x18\t \x01(\tR\bchecksum\"u\n" +
-	"\x18UpdateDeviceStateRequest\x12\x1b\n" +
-	"\tdevice_id\x18\x01 \x01(\tR\bdeviceId\x12<\n" +
-	"\rdevice_status\x18\x02 \x01(\x0e2\x17.device.v1.DeviceStatusR\fdeviceStatus\"\x1b\n" +
-	"\x19UpdateDeviceStateResponse*\xb7\x01\n" +
+	"\bchecksum\x18\t \x01(\tR\bchecksum\"S\n" +
+	"\x13UpdateDeviceRequest\x12<\n" +
+	"\rdevice_status\x18\x01 \x01(\x0e2\x17.device.v1.DeviceStatusR\fdeviceStatus\"\x16\n" +
+	"\x14UpdateDeviceResponse*J\n" +
+	"\bProtocol\x12\x18\n" +
+	"\x14PROTOCOL_UNSPECIFIED\x10\x00\x12\x11\n" +
+	"\rPROTOCOL_HTTP\x10\x01\x12\x11\n" +
+	"\rPROTOCOL_GRPC\x10\x02*\xb7\x01\n" +
 	"\fDeviceStatus\x12\x1d\n" +
 	"\x19DEVICE_STATUS_UNSPECIFIED\x10\x00\x12\x19\n" +
 	"\x15DEVICE_STATUS_HEALTHY\x10\x01\x12\x1a\n" +
 	"\x16DEVICE_STATUS_DEGRADED\x10\x02\x12\x17\n" +
 	"\x13DEVICE_STATUS_ERROR\x10\x03\x12\x1d\n" +
 	"\x19DEVICE_STATUS_MAINTENANCE\x10\x04\x12\x19\n" +
-	"\x15DEVICE_STATUS_BOOTING\x10\x052\xc7\x03\n" +
+	"\x15DEVICE_STATUS_BOOTING\x10\x052\xac\x03\n" +
 	"\x06Device\x12Z\n" +
 	"\tGetHealth\x12\x1b.device.v1.GetHealthRequest\x1a\x1c.device.v1.GetHealthResponse\"\x12\x82\xd3\xe4\x93\x02\f\x12\n" +
-	"/v1/health\x12k\n" +
-	"\x0eGetDiagnostics\x12 .device.v1.GetDiagnosticsRequest\x1a\x1e.device.v1.DiagnosticsResponse\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/v1/diagnostics\x12w\n" +
-	"\x11StreamDiagnostics\x12 .device.v1.GetDiagnosticsRequest\x1a\x1e.device.v1.DiagnosticsResponse\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/v1/diagnostics/stream0\x01\x12{\n" +
-	"\x11UpdateDeviceState\x12#.device.v1.UpdateDeviceStateRequest\x1a$.device.v1.UpdateDeviceStateResponse\"\x1b\x82\xd3\xe4\x93\x02\x15:\x01*2\x10/v1/device/stateBCZAgithub.com/emil-j-olsson/ubiquiti/device/proto/device/v1;devicev1b\x06proto3"
+	"/v1/health\x12h\n" +
+	"\x0eGetDiagnostics\x12\x1d.device.v1.DiagnosticsRequest\x1a\x1e.device.v1.DiagnosticsResponse\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/v1/diagnostics\x12t\n" +
+	"\x11StreamDiagnostics\x12\x1d.device.v1.DiagnosticsRequest\x1a\x1e.device.v1.DiagnosticsResponse\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/v1/diagnostics/stream0\x01\x12f\n" +
+	"\fUpdateDevice\x12\x1e.device.v1.UpdateDeviceRequest\x1a\x1f.device.v1.UpdateDeviceResponse\"\x15\x82\xd3\xe4\x93\x02\x0f:\x01*2\n" +
+	"/v1/deviceBCZAgithub.com/emil-j-olsson/ubiquiti/device/proto/device/v1;devicev1b\x06proto3"
 
 var (
 	file_proto_device_v1_device_proto_rawDescOnce sync.Once
@@ -478,36 +525,38 @@ func file_proto_device_v1_device_proto_rawDescGZIP() []byte {
 	return file_proto_device_v1_device_proto_rawDescData
 }
 
-var file_proto_device_v1_device_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_proto_device_v1_device_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
 var file_proto_device_v1_device_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_proto_device_v1_device_proto_goTypes = []any{
-	(DeviceStatus)(0),                 // 0: device.v1.DeviceStatus
-	(*GetHealthRequest)(nil),          // 1: device.v1.GetHealthRequest
-	(*GetHealthResponse)(nil),         // 2: device.v1.GetHealthResponse
-	(*GetDiagnosticsRequest)(nil),     // 3: device.v1.GetDiagnosticsRequest
-	(*DiagnosticsResponse)(nil),       // 4: device.v1.DiagnosticsResponse
-	(*UpdateDeviceStateRequest)(nil),  // 5: device.v1.UpdateDeviceStateRequest
-	(*UpdateDeviceStateResponse)(nil), // 6: device.v1.UpdateDeviceStateResponse
-	(*timestamppb.Timestamp)(nil),     // 7: google.protobuf.Timestamp
+	(Protocol)(0),                 // 0: device.v1.Protocol
+	(DeviceStatus)(0),             // 1: device.v1.DeviceStatus
+	(*GetHealthRequest)(nil),      // 2: device.v1.GetHealthRequest
+	(*GetHealthResponse)(nil),     // 3: device.v1.GetHealthResponse
+	(*DiagnosticsRequest)(nil),    // 4: device.v1.DiagnosticsRequest
+	(*DiagnosticsResponse)(nil),   // 5: device.v1.DiagnosticsResponse
+	(*UpdateDeviceRequest)(nil),   // 6: device.v1.UpdateDeviceRequest
+	(*UpdateDeviceResponse)(nil),  // 7: device.v1.UpdateDeviceResponse
+	(*timestamppb.Timestamp)(nil), // 8: google.protobuf.Timestamp
 }
 var file_proto_device_v1_device_proto_depIdxs = []int32{
-	7, // 0: device.v1.GetHealthResponse.timestamp:type_name -> google.protobuf.Timestamp
-	7, // 1: device.v1.DiagnosticsResponse.timestamp:type_name -> google.protobuf.Timestamp
-	0, // 2: device.v1.DiagnosticsResponse.device_status:type_name -> device.v1.DeviceStatus
-	0, // 3: device.v1.UpdateDeviceStateRequest.device_status:type_name -> device.v1.DeviceStatus
-	1, // 4: device.v1.Device.GetHealth:input_type -> device.v1.GetHealthRequest
-	3, // 5: device.v1.Device.GetDiagnostics:input_type -> device.v1.GetDiagnosticsRequest
-	3, // 6: device.v1.Device.StreamDiagnostics:input_type -> device.v1.GetDiagnosticsRequest
-	5, // 7: device.v1.Device.UpdateDeviceState:input_type -> device.v1.UpdateDeviceStateRequest
-	2, // 8: device.v1.Device.GetHealth:output_type -> device.v1.GetHealthResponse
-	4, // 9: device.v1.Device.GetDiagnostics:output_type -> device.v1.DiagnosticsResponse
-	4, // 10: device.v1.Device.StreamDiagnostics:output_type -> device.v1.DiagnosticsResponse
-	6, // 11: device.v1.Device.UpdateDeviceState:output_type -> device.v1.UpdateDeviceStateResponse
-	8, // [8:12] is the sub-list for method output_type
-	4, // [4:8] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	8, // 0: device.v1.GetHealthResponse.updated_at:type_name -> google.protobuf.Timestamp
+	0, // 1: device.v1.GetHealthResponse.supported_protocols:type_name -> device.v1.Protocol
+	8, // 2: device.v1.DiagnosticsResponse.timestamp:type_name -> google.protobuf.Timestamp
+	1, // 3: device.v1.DiagnosticsResponse.device_status:type_name -> device.v1.DeviceStatus
+	1, // 4: device.v1.UpdateDeviceRequest.device_status:type_name -> device.v1.DeviceStatus
+	2, // 5: device.v1.Device.GetHealth:input_type -> device.v1.GetHealthRequest
+	4, // 6: device.v1.Device.GetDiagnostics:input_type -> device.v1.DiagnosticsRequest
+	4, // 7: device.v1.Device.StreamDiagnostics:input_type -> device.v1.DiagnosticsRequest
+	6, // 8: device.v1.Device.UpdateDevice:input_type -> device.v1.UpdateDeviceRequest
+	3, // 9: device.v1.Device.GetHealth:output_type -> device.v1.GetHealthResponse
+	5, // 10: device.v1.Device.GetDiagnostics:output_type -> device.v1.DiagnosticsResponse
+	5, // 11: device.v1.Device.StreamDiagnostics:output_type -> device.v1.DiagnosticsResponse
+	7, // 12: device.v1.Device.UpdateDevice:output_type -> device.v1.UpdateDeviceResponse
+	9, // [9:13] is the sub-list for method output_type
+	5, // [5:9] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_proto_device_v1_device_proto_init() }
@@ -520,7 +569,7 @@ func file_proto_device_v1_device_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_device_v1_device_proto_rawDesc), len(file_proto_device_v1_device_proto_rawDesc)),
-			NumEnums:      1,
+			NumEnums:      2,
 			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,

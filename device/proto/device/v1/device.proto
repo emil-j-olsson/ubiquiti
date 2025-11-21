@@ -12,22 +12,28 @@ service Device {
             get: "/v1/health"
         };
     }
-    rpc GetDiagnostics(GetDiagnosticsRequest) returns (DiagnosticsResponse) {
+    rpc GetDiagnostics(DiagnosticsRequest) returns (DiagnosticsResponse) {
         option (google.api.http) = {
             get: "/v1/diagnostics"
         };
     }
-    rpc StreamDiagnostics(GetDiagnosticsRequest) returns (stream DiagnosticsResponse) {
+    rpc StreamDiagnostics(DiagnosticsRequest) returns (stream DiagnosticsResponse) {
         option (google.api.http) = {
             get: "/v1/diagnostics/stream"
         };
     }
-    rpc UpdateDeviceState(UpdateDeviceStateRequest) returns (UpdateDeviceStateResponse) {
+    rpc UpdateDevice(UpdateDeviceRequest) returns (UpdateDeviceResponse) {
         option (google.api.http) = {
-            patch: "/v1/device/state"
+            patch: "/v1/device"
             body: "*"
         };
     }
+}
+
+enum Protocol {
+    PROTOCOL_UNSPECIFIED = 0;
+    PROTOCOL_HTTP = 1;
+    PROTOCOL_GRPC = 2;
 }
 
 enum DeviceStatus {
@@ -42,14 +48,14 @@ enum DeviceStatus {
 message GetHealthRequest {}
 
 message GetHealthResponse {
-    google.protobuf.Timestamp timestamp = 1;
+    google.protobuf.Timestamp updated_at = 1;
     string device_id = 2;
-    repeated string supported_protocols = 3;
+    repeated Protocol supported_protocols = 3;
     string architecture = 4;
     string os = 5;
 }
 
-message GetDiagnosticsRequest {}
+message DiagnosticsRequest {}
 
 message DiagnosticsResponse {
     google.protobuf.Timestamp timestamp = 1;
@@ -63,9 +69,8 @@ message DiagnosticsResponse {
     string checksum = 9;
 }
 
-message UpdateDeviceStateRequest {
-    string device_id = 1;
-    DeviceStatus device_status = 2;
+message UpdateDeviceRequest {
+    DeviceStatus device_status = 1;
 }
 
-message UpdateDeviceStateResponse {}
+message UpdateDeviceResponse {}

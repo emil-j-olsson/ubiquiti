@@ -3,6 +3,7 @@ package cache
 import (
 	"runtime"
 	"sync"
+	"time"
 
 	"github.com/emil-j-olsson/ubiquiti/device/internal/types"
 )
@@ -28,10 +29,10 @@ func (c *Cache[V]) Set(value V) {
 	c.value = value
 }
 
-func (c *Cache[V]) Update(fn func(V)) V {
+func (c *Cache[V]) Update(fn func(*V)) V {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	fn(c.value)
+	fn(&c.value)
 	return c.value
 }
 
@@ -41,15 +42,30 @@ type State struct {
 
 func NewDeviceState(config types.Config) *State {
 	state := types.DeviceState{
-		Identifier:     config.Identifier,
-		DeviceVersions: config.DeviceVersions,
-		Architecture:   runtime.GOARCH,
-		OS:             runtime.GOOS,
-		DeviceStatus:   types.DeviceStatusBooting,
+		Identifier:         config.Identifier,
+		SupportedProtocols: config.SupportedProtocols,
+		DeviceVersions:     config.DeviceVersions,
+		Architecture:       runtime.GOARCH,
+		OS:                 runtime.GOOS,
+		DeviceStatus:       types.DeviceStatusBooting,
+		StreamInterval:     config.StreamInterval,
+		Updated:            time.Now(),
 	}
 	return &State{cache: NewCache(state)}
 }
 
-// depending on state, we will allow calls to grpc/http... set the status... etc...
+func (s *State) GetState() types.DeviceState {
+	return s.cache.Get()
+}
 
-// methods to update state
+func (s *State) SetState(state types.DeviceState) {
+	state.Updated = time.Now()
+	s.cache.Set(state)
+}
+
+func (s *State) UpdateState(fn func(*types.DeviceState)) types.DeviceState {
+	return s.cache.Update(func(state *types.DeviceState) {
+		fn(state)
+		state.Updated = time.Now()
+	})
+}

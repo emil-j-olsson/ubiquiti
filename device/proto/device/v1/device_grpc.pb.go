@@ -8,6 +8,7 @@ package devicev1
 
 import (
 	context "context"
+
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -22,7 +23,7 @@ const (
 	Device_GetHealth_FullMethodName         = "/device.v1.Device/GetHealth"
 	Device_GetDiagnostics_FullMethodName    = "/device.v1.Device/GetDiagnostics"
 	Device_StreamDiagnostics_FullMethodName = "/device.v1.Device/StreamDiagnostics"
-	Device_UpdateDeviceState_FullMethodName = "/device.v1.Device/UpdateDeviceState"
+	Device_UpdateDevice_FullMethodName      = "/device.v1.Device/UpdateDevice"
 )
 
 // DeviceClient is the client API for Device service.
@@ -30,9 +31,9 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DeviceClient interface {
 	GetHealth(ctx context.Context, in *GetHealthRequest, opts ...grpc.CallOption) (*GetHealthResponse, error)
-	GetDiagnostics(ctx context.Context, in *GetDiagnosticsRequest, opts ...grpc.CallOption) (*DiagnosticsResponse, error)
-	StreamDiagnostics(ctx context.Context, in *GetDiagnosticsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[DiagnosticsResponse], error)
-	UpdateDeviceState(ctx context.Context, in *UpdateDeviceStateRequest, opts ...grpc.CallOption) (*UpdateDeviceStateResponse, error)
+	GetDiagnostics(ctx context.Context, in *DiagnosticsRequest, opts ...grpc.CallOption) (*DiagnosticsResponse, error)
+	StreamDiagnostics(ctx context.Context, in *DiagnosticsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[DiagnosticsResponse], error)
+	UpdateDevice(ctx context.Context, in *UpdateDeviceRequest, opts ...grpc.CallOption) (*UpdateDeviceResponse, error)
 }
 
 type deviceClient struct {
@@ -53,7 +54,7 @@ func (c *deviceClient) GetHealth(ctx context.Context, in *GetHealthRequest, opts
 	return out, nil
 }
 
-func (c *deviceClient) GetDiagnostics(ctx context.Context, in *GetDiagnosticsRequest, opts ...grpc.CallOption) (*DiagnosticsResponse, error) {
+func (c *deviceClient) GetDiagnostics(ctx context.Context, in *DiagnosticsRequest, opts ...grpc.CallOption) (*DiagnosticsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DiagnosticsResponse)
 	err := c.cc.Invoke(ctx, Device_GetDiagnostics_FullMethodName, in, out, cOpts...)
@@ -63,13 +64,13 @@ func (c *deviceClient) GetDiagnostics(ctx context.Context, in *GetDiagnosticsReq
 	return out, nil
 }
 
-func (c *deviceClient) StreamDiagnostics(ctx context.Context, in *GetDiagnosticsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[DiagnosticsResponse], error) {
+func (c *deviceClient) StreamDiagnostics(ctx context.Context, in *DiagnosticsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[DiagnosticsResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	stream, err := c.cc.NewStream(ctx, &Device_ServiceDesc.Streams[0], Device_StreamDiagnostics_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &grpc.GenericClientStream[GetDiagnosticsRequest, DiagnosticsResponse]{ClientStream: stream}
+	x := &grpc.GenericClientStream[DiagnosticsRequest, DiagnosticsResponse]{ClientStream: stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -82,10 +83,10 @@ func (c *deviceClient) StreamDiagnostics(ctx context.Context, in *GetDiagnostics
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Device_StreamDiagnosticsClient = grpc.ServerStreamingClient[DiagnosticsResponse]
 
-func (c *deviceClient) UpdateDeviceState(ctx context.Context, in *UpdateDeviceStateRequest, opts ...grpc.CallOption) (*UpdateDeviceStateResponse, error) {
+func (c *deviceClient) UpdateDevice(ctx context.Context, in *UpdateDeviceRequest, opts ...grpc.CallOption) (*UpdateDeviceResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateDeviceStateResponse)
-	err := c.cc.Invoke(ctx, Device_UpdateDeviceState_FullMethodName, in, out, cOpts...)
+	out := new(UpdateDeviceResponse)
+	err := c.cc.Invoke(ctx, Device_UpdateDevice_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -97,9 +98,9 @@ func (c *deviceClient) UpdateDeviceState(ctx context.Context, in *UpdateDeviceSt
 // for forward compatibility.
 type DeviceServer interface {
 	GetHealth(context.Context, *GetHealthRequest) (*GetHealthResponse, error)
-	GetDiagnostics(context.Context, *GetDiagnosticsRequest) (*DiagnosticsResponse, error)
-	StreamDiagnostics(*GetDiagnosticsRequest, grpc.ServerStreamingServer[DiagnosticsResponse]) error
-	UpdateDeviceState(context.Context, *UpdateDeviceStateRequest) (*UpdateDeviceStateResponse, error)
+	GetDiagnostics(context.Context, *DiagnosticsRequest) (*DiagnosticsResponse, error)
+	StreamDiagnostics(*DiagnosticsRequest, grpc.ServerStreamingServer[DiagnosticsResponse]) error
+	UpdateDevice(context.Context, *UpdateDeviceRequest) (*UpdateDeviceResponse, error)
 	mustEmbedUnimplementedDeviceServer()
 }
 
@@ -113,14 +114,14 @@ type UnimplementedDeviceServer struct{}
 func (UnimplementedDeviceServer) GetHealth(context.Context, *GetHealthRequest) (*GetHealthResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetHealth not implemented")
 }
-func (UnimplementedDeviceServer) GetDiagnostics(context.Context, *GetDiagnosticsRequest) (*DiagnosticsResponse, error) {
+func (UnimplementedDeviceServer) GetDiagnostics(context.Context, *DiagnosticsRequest) (*DiagnosticsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDiagnostics not implemented")
 }
-func (UnimplementedDeviceServer) StreamDiagnostics(*GetDiagnosticsRequest, grpc.ServerStreamingServer[DiagnosticsResponse]) error {
+func (UnimplementedDeviceServer) StreamDiagnostics(*DiagnosticsRequest, grpc.ServerStreamingServer[DiagnosticsResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method StreamDiagnostics not implemented")
 }
-func (UnimplementedDeviceServer) UpdateDeviceState(context.Context, *UpdateDeviceStateRequest) (*UpdateDeviceStateResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateDeviceState not implemented")
+func (UnimplementedDeviceServer) UpdateDevice(context.Context, *UpdateDeviceRequest) (*UpdateDeviceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateDevice not implemented")
 }
 func (UnimplementedDeviceServer) mustEmbedUnimplementedDeviceServer() {}
 func (UnimplementedDeviceServer) testEmbeddedByValue()                {}
@@ -162,7 +163,7 @@ func _Device_GetHealth_Handler(srv interface{}, ctx context.Context, dec func(in
 }
 
 func _Device_GetDiagnostics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetDiagnosticsRequest)
+	in := new(DiagnosticsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -174,36 +175,36 @@ func _Device_GetDiagnostics_Handler(srv interface{}, ctx context.Context, dec fu
 		FullMethod: Device_GetDiagnostics_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DeviceServer).GetDiagnostics(ctx, req.(*GetDiagnosticsRequest))
+		return srv.(DeviceServer).GetDiagnostics(ctx, req.(*DiagnosticsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Device_StreamDiagnostics_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(GetDiagnosticsRequest)
+	m := new(DiagnosticsRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(DeviceServer).StreamDiagnostics(m, &grpc.GenericServerStream[GetDiagnosticsRequest, DiagnosticsResponse]{ServerStream: stream})
+	return srv.(DeviceServer).StreamDiagnostics(m, &grpc.GenericServerStream[DiagnosticsRequest, DiagnosticsResponse]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Device_StreamDiagnosticsServer = grpc.ServerStreamingServer[DiagnosticsResponse]
 
-func _Device_UpdateDeviceState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateDeviceStateRequest)
+func _Device_UpdateDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateDeviceRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DeviceServer).UpdateDeviceState(ctx, in)
+		return srv.(DeviceServer).UpdateDevice(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Device_UpdateDeviceState_FullMethodName,
+		FullMethod: Device_UpdateDevice_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DeviceServer).UpdateDeviceState(ctx, req.(*UpdateDeviceStateRequest))
+		return srv.(DeviceServer).UpdateDevice(ctx, req.(*UpdateDeviceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -224,8 +225,8 @@ var Device_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Device_GetDiagnostics_Handler,
 		},
 		{
-			MethodName: "UpdateDeviceState",
-			Handler:    _Device_UpdateDeviceState_Handler,
+			MethodName: "UpdateDevice",
+			Handler:    _Device_UpdateDevice_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

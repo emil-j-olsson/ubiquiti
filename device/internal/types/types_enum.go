@@ -13,15 +13,15 @@ import (
 
 const (
 	// DeviceStatusHealthy is a DeviceStatus of type healthy.
-	DeviceStatusHealthy DeviceStatus = "healthy"
+	DeviceStatusHealthy DeviceStatus = "DEVICE_STATUS_HEALTHY"
 	// DeviceStatusDegraded is a DeviceStatus of type degraded.
-	DeviceStatusDegraded DeviceStatus = "degraded"
+	DeviceStatusDegraded DeviceStatus = "DEVICE_STATUS_DEGRADED"
 	// DeviceStatusError is a DeviceStatus of type error.
-	DeviceStatusError DeviceStatus = "error"
+	DeviceStatusError DeviceStatus = "DEVICE_STATUS_ERROR"
 	// DeviceStatusMaintenance is a DeviceStatus of type maintenance.
-	DeviceStatusMaintenance DeviceStatus = "maintenance"
+	DeviceStatusMaintenance DeviceStatus = "DEVICE_STATUS_MAINTENANCE"
 	// DeviceStatusBooting is a DeviceStatus of type booting.
-	DeviceStatusBooting DeviceStatus = "booting"
+	DeviceStatusBooting DeviceStatus = "DEVICE_STATUS_BOOTING"
 )
 
 var ErrInvalidDeviceStatus = errors.New("not a valid DeviceStatus")
@@ -39,11 +39,11 @@ func (x DeviceStatus) IsValid() bool {
 }
 
 var _DeviceStatusValue = map[string]DeviceStatus{
-	"healthy":     DeviceStatusHealthy,
-	"degraded":    DeviceStatusDegraded,
-	"error":       DeviceStatusError,
-	"maintenance": DeviceStatusMaintenance,
-	"booting":     DeviceStatusBooting,
+	"DEVICE_STATUS_HEALTHY":     DeviceStatusHealthy,
+	"DEVICE_STATUS_DEGRADED":    DeviceStatusDegraded,
+	"DEVICE_STATUS_ERROR":       DeviceStatusError,
+	"DEVICE_STATUS_MAINTENANCE": DeviceStatusMaintenance,
+	"DEVICE_STATUS_BOOTING":     DeviceStatusBooting,
 }
 
 // ParseDeviceStatus attempts to convert a string to a DeviceStatus.

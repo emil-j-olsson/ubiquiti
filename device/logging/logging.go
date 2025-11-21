@@ -7,7 +7,6 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// rewrite (encapsulate zap)
 func NewDefaultLogger() (*zap.Logger, func()) {
 	logger, err := zap.NewProduction()
 	if err != nil {
