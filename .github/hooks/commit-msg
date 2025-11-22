@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+commit_regex='^(feat|fix|build|chore|docs|style|refactor|perf|test)?(\(([a-z0-9*-/]))!?: (.+[^.\r\n])([\r\n]+(.+[\r\n]+)+)?$'
+error_message=''
+
+if !grep -iqE "${commit_regex}" "$1"; then
+    echo "${error_message}" >&2
+    exit 1
+fi
