@@ -33,7 +33,9 @@ service Device {
 enum Protocol {
     PROTOCOL_UNSPECIFIED = 0;
     PROTOCOL_HTTP = 1;
-    PROTOCOL_GRPC = 2;
+    PROTOCOL_HTTP_STREAM = 2;
+    PROTOCOL_GRPC = 3;
+    PROTOCOL_GRPC_STREAM = 4;
 }
 
 enum DeviceStatus {
@@ -48,9 +50,9 @@ enum DeviceStatus {
 message GetHealthRequest {}
 
 message GetHealthResponse {
-    google.protobuf.Timestamp updated_at = 1;
-    string device_id = 2;
-    repeated Protocol supported_protocols = 3;
+    google.protobuf.Timestamp updated_at = 1 [json_name="updated_at"];
+    string device_id = 2 [json_name="device_id"];
+    repeated Protocol supported_protocols = 3 [json_name="supported_protocols"];
     string architecture = 4;
     string os = 5;
 }
@@ -59,18 +61,18 @@ message DiagnosticsRequest {}
 
 message DiagnosticsResponse {
     google.protobuf.Timestamp timestamp = 1;
-    string device_id = 2;
-    string hardware_version = 3;
-    string software_version = 4;
-    string firmware_version = 5;
-    double cpu_usage = 6;
-    double memory_usage = 7;
-    DeviceStatus device_status = 8;
+    string device_id = 2 [json_name="device_id"];
+    string hardware_version = 3 [json_name="hardware_version"];
+    string software_version = 4 [json_name="software_version"];
+    string firmware_version = 5 [json_name="firmware_version"];
+    double cpu_usage = 6 [json_name="cpu_usage"];
+    double memory_usage = 7 [json_name="memory_usage"];
+    DeviceStatus device_status = 8 [json_name="device_status"];
     string checksum = 9;
 }
 
 message UpdateDeviceRequest {
-    DeviceStatus device_status = 1;
+    DeviceStatus device_status = 1 [json_name="device_status"];
 }
 
 message UpdateDeviceResponse {}

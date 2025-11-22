@@ -1,6 +1,19 @@
 GO_TEST_CMD := $(if $(shell which gotest), gotest, go test)
 DOCKER_COMPOSE_CMD := $(if $(shell PATH=$(PATH) command -v docker-compose), docker-compose, docker compose)
 
+.PHONY: dev/up dev/rebuild dev/down dev/logs
+dev/up:
+	$(DOCKER_COMPOSE_CMD) -f docker-compose.yaml up -d
+
+dev/rebuild:
+	$(DOCKER_COMPOSE_CMD) -f docker-compose.yaml up -d --build
+
+dev/down:
+	$(DOCKER_COMPOSE_CMD) -f docker-compose.yaml down -v
+
+dev/logs:
+	$(DOCKER_COMPOSE_CMD) -f docker-compose.yaml logs -f
+
 .PHONY: fmt/global fmt
 fmt/global: $(GOPATH)/bin/goimports $(GOPATH)/bin/golines
 	goimports -w .; \
@@ -13,14 +26,14 @@ fmt: $(GOPATH)/bin/goimports $(GOPATH)/bin/golines
 
 .PHONY: lint
 lint: $(GOPATH)/bin/golangci-lint
-	golangci-lint run
+	golangci-lint run ./device/...
 
 .PHONY: generate/env generate
 generate/env:
 	cp ./.env.example ./.env
 
 generate:
-	go generate ./...
+	go generate ./device/...
 
 .PHONY: git/hooks
 git/hooks:
@@ -33,7 +46,7 @@ $(GOPATH)/bin/golines:
 	go install github.com/segmentio/golines@latest
 
 $(GOPATH)/bin/golangci-lint:
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.6.2
 
 $(GOPATH)/bin/go-enum:
 	go install github.com/abice/go-enum@latest

@@ -2,9 +2,8 @@ VERSION  = $(shell git describe --always --tags --dirty=-dirty)
 REVISION = $(shell git rev-parse --short=8 HEAD)
 BRANCH   = $(shell git rev-parse --abbrev-ref HEAD)
 
-# move: should probably be in the root (ci)
 LDFLAGS ?= -X $(PKG).Version=${VERSION} \
-	-X $(PKG).Revision=${REVISION} \ 
+	-X $(PKG).Revision=${REVISION} \
 	-X $(PKG).Branch=${BRANCH} \
 	-X $(PKG).Branch=${shell date +%Y-%m-%dT%T%z}
 
@@ -12,10 +11,13 @@ LDFLAGS ?= -X $(PKG).Version=${VERSION} \
 ldflags:
 	@echo $(LDFLAGS)
 
-# TODO: make shared...
-PROTOC_IMAGE := device-protoc
+.PHONY: build
+build:
+	@mkdir -p bin
+	CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -o bin/server ./cmd/server
 
-.PHONY: generate/proto
+PROTOC_IMAGE := device-protoc
+.PHONY: generate generate/proto
 generate/proto:
 	docker build -t $(PROTOC_IMAGE) -f tools/protoc/Dockerfile .
 	docker run --rm -v $(PWD):/workspace $(PROTOC_IMAGE) \

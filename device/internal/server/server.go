@@ -48,7 +48,7 @@ func (s *Server) GetHealth(
 	ctx context.Context,
 	_ *devicev1.GetHealthRequest,
 ) (*devicev1.GetHealthResponse, error) {
-	ctx, cancel := context.WithTimeout(ctx, DefaultContextTimeout)
+	_, cancel := context.WithTimeout(ctx, DefaultContextTimeout)
 	defer cancel()
 	health := s.provider.GetHealth()
 	protocols := make([]devicev1.Protocol, 0, len(health.SupportedProtocols))
@@ -70,7 +70,7 @@ func (s *Server) GetDiagnostics(
 	ctx context.Context,
 	_ *devicev1.DiagnosticsRequest,
 ) (*devicev1.DiagnosticsResponse, error) {
-	ctx, cancel := context.WithTimeout(ctx, DefaultContextTimeout)
+	_, cancel := context.WithTimeout(ctx, DefaultContextTimeout)
 	defer cancel()
 	diagnostics := s.provider.GetDiagnostics()
 	return s.diagnostics(diagnostics), nil
@@ -95,7 +95,7 @@ func (s *Server) UpdateDevice(
 	ctx context.Context,
 	req *devicev1.UpdateDeviceRequest,
 ) (*devicev1.UpdateDeviceResponse, error) {
-	ctx, cancel := context.WithTimeout(ctx, DefaultContextTimeout)
+	_, cancel := context.WithTimeout(ctx, DefaultContextTimeout)
 	defer cancel()
 	if err := req.Validate(); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())

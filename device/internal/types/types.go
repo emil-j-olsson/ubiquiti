@@ -24,14 +24,14 @@ type Config struct {
 	GatewayHost        string         `envconfig:"GATEWAY_HOST"    default:"localhost"`
 	Identifier         string         `envconfig:"IDENTIFIER"      default:"device-001"`
 	SupportedProtocols []Protocol     `envconfig:"PROTOCOLS"       default:"http,grpc"`
-	DeviceVersions     DeviceVersions `envconfig:"DEVICE_VERSION"`
+	DeviceVersions     DeviceVersions `envconfig:"VERSION"`
 	StreamInterval     time.Duration  `envconfig:"STREAM_INTERVAL" default:"500ms"`
 }
 
 type DeviceVersions struct {
-	Hardware string `envconfig:"HARDWARE" default:"hw-1.0.0"`
-	Software string `envconfig:"SOFTWARE" default:"sw-1.0.0"`
-	Firmware string `envconfig:"FIRMWARE" default:"fw-1.0.0"`
+	Hardware string `envconfig:"HARDWARE" default:"HW:1.0.0"`
+	Software string `envconfig:"SOFTWARE" default:"SW:1.0.0"`
+	Firmware string `envconfig:"FIRMWARE" default:"FW:1.0.0"`
 }
 
 type DeviceState struct {
@@ -110,7 +110,7 @@ func (d *DeviceStatus) Proto() devicev1.DeviceStatus {
 	}
 }
 
-// ENUM(http, grpc)
+// ENUM(http, http-stream, grpc, grpc-stream)
 type Protocol string
 
 func (p *Protocol) Decode(value string) error {
@@ -126,8 +126,12 @@ func (p *Protocol) Proto() devicev1.Protocol {
 	switch *p {
 	case ProtocolHttp:
 		return devicev1.Protocol_PROTOCOL_HTTP
+	case ProtocolHttpStream:
+		return devicev1.Protocol_PROTOCOL_HTTP_STREAM
 	case ProtocolGrpc:
 		return devicev1.Protocol_PROTOCOL_GRPC
+	case ProtocolGrpcStream:
+		return devicev1.Protocol_PROTOCOL_GRPC_STREAM
 	default:
 		return devicev1.Protocol_PROTOCOL_UNSPECIFIED
 	}

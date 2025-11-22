@@ -7,14 +7,13 @@
 package devicev1
 
 import (
-	reflect "reflect"
-	sync "sync"
-	unsafe "unsafe"
-
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
+	reflect "reflect"
+	sync "sync"
+	unsafe "unsafe"
 )
 
 const (
@@ -29,7 +28,9 @@ type Protocol int32
 const (
 	Protocol_PROTOCOL_UNSPECIFIED Protocol = 0
 	Protocol_PROTOCOL_HTTP        Protocol = 1
-	Protocol_PROTOCOL_GRPC        Protocol = 2
+	Protocol_PROTOCOL_HTTP_STREAM Protocol = 2
+	Protocol_PROTOCOL_GRPC        Protocol = 3
+	Protocol_PROTOCOL_GRPC_STREAM Protocol = 4
 )
 
 // Enum value maps for Protocol.
@@ -37,12 +38,16 @@ var (
 	Protocol_name = map[int32]string{
 		0: "PROTOCOL_UNSPECIFIED",
 		1: "PROTOCOL_HTTP",
-		2: "PROTOCOL_GRPC",
+		2: "PROTOCOL_HTTP_STREAM",
+		3: "PROTOCOL_GRPC",
+		4: "PROTOCOL_GRPC_STREAM",
 	}
 	Protocol_value = map[string]int32{
 		"PROTOCOL_UNSPECIFIED": 0,
 		"PROTOCOL_HTTP":        1,
-		"PROTOCOL_GRPC":        2,
+		"PROTOCOL_HTTP_STREAM": 2,
+		"PROTOCOL_GRPC":        3,
+		"PROTOCOL_GRPC_STREAM": 4,
 	}
 )
 
@@ -169,9 +174,9 @@ func (*GetHealthRequest) Descriptor() ([]byte, []int) {
 
 type GetHealthResponse struct {
 	state              protoimpl.MessageState `protogen:"open.v1"`
-	UpdatedAt          *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	DeviceId           string                 `protobuf:"bytes,2,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
-	SupportedProtocols []Protocol             `protobuf:"varint,3,rep,packed,name=supported_protocols,json=supportedProtocols,proto3,enum=device.v1.Protocol" json:"supported_protocols,omitempty"`
+	UpdatedAt          *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=updated_at,proto3" json:"updated_at,omitempty"`
+	DeviceId           string                 `protobuf:"bytes,2,opt,name=device_id,proto3" json:"device_id,omitempty"`
+	SupportedProtocols []Protocol             `protobuf:"varint,3,rep,packed,name=supported_protocols,proto3,enum=device.v1.Protocol" json:"supported_protocols,omitempty"`
 	Architecture       string                 `protobuf:"bytes,4,opt,name=architecture,proto3" json:"architecture,omitempty"`
 	Os                 string                 `protobuf:"bytes,5,opt,name=os,proto3" json:"os,omitempty"`
 	unknownFields      protoimpl.UnknownFields
@@ -282,13 +287,13 @@ func (*DiagnosticsRequest) Descriptor() ([]byte, []int) {
 type DiagnosticsResponse struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	Timestamp       *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
-	DeviceId        string                 `protobuf:"bytes,2,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
-	HardwareVersion string                 `protobuf:"bytes,3,opt,name=hardware_version,json=hardwareVersion,proto3" json:"hardware_version,omitempty"`
-	SoftwareVersion string                 `protobuf:"bytes,4,opt,name=software_version,json=softwareVersion,proto3" json:"software_version,omitempty"`
-	FirmwareVersion string                 `protobuf:"bytes,5,opt,name=firmware_version,json=firmwareVersion,proto3" json:"firmware_version,omitempty"`
-	CpuUsage        float64                `protobuf:"fixed64,6,opt,name=cpu_usage,json=cpuUsage,proto3" json:"cpu_usage,omitempty"`
-	MemoryUsage     float64                `protobuf:"fixed64,7,opt,name=memory_usage,json=memoryUsage,proto3" json:"memory_usage,omitempty"`
-	DeviceStatus    DeviceStatus           `protobuf:"varint,8,opt,name=device_status,json=deviceStatus,proto3,enum=device.v1.DeviceStatus" json:"device_status,omitempty"`
+	DeviceId        string                 `protobuf:"bytes,2,opt,name=device_id,proto3" json:"device_id,omitempty"`
+	HardwareVersion string                 `protobuf:"bytes,3,opt,name=hardware_version,proto3" json:"hardware_version,omitempty"`
+	SoftwareVersion string                 `protobuf:"bytes,4,opt,name=software_version,proto3" json:"software_version,omitempty"`
+	FirmwareVersion string                 `protobuf:"bytes,5,opt,name=firmware_version,proto3" json:"firmware_version,omitempty"`
+	CpuUsage        float64                `protobuf:"fixed64,6,opt,name=cpu_usage,proto3" json:"cpu_usage,omitempty"`
+	MemoryUsage     float64                `protobuf:"fixed64,7,opt,name=memory_usage,proto3" json:"memory_usage,omitempty"`
+	DeviceStatus    DeviceStatus           `protobuf:"varint,8,opt,name=device_status,proto3,enum=device.v1.DeviceStatus" json:"device_status,omitempty"`
 	Checksum        string                 `protobuf:"bytes,9,opt,name=checksum,proto3" json:"checksum,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
@@ -389,7 +394,7 @@ func (x *DiagnosticsResponse) GetChecksum() string {
 
 type UpdateDeviceRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	DeviceStatus  DeviceStatus           `protobuf:"varint,1,opt,name=device_status,json=deviceStatus,proto3,enum=device.v1.DeviceStatus" json:"device_status,omitempty"`
+	DeviceStatus  DeviceStatus           `protobuf:"varint,1,opt,name=device_status,proto3,enum=device.v1.DeviceStatus" json:"device_status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -472,32 +477,35 @@ var File_proto_device_v1_device_proto protoreflect.FileDescriptor
 const file_proto_device_v1_device_proto_rawDesc = "" +
 	"\n" +
 	"\x1cproto/device/v1/device.proto\x12\tdevice.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x12\n" +
-	"\x10GetHealthRequest\"\xe5\x01\n" +
-	"\x11GetHealthResponse\x129\n" +
+	"\x10GetHealthRequest\"\xe8\x01\n" +
+	"\x11GetHealthResponse\x12:\n" +
 	"\n" +
-	"updated_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x1b\n" +
-	"\tdevice_id\x18\x02 \x01(\tR\bdeviceId\x12D\n" +
-	"\x13supported_protocols\x18\x03 \x03(\x0e2\x13.device.v1.ProtocolR\x12supportedProtocols\x12\"\n" +
+	"updated_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"updated_at\x12\x1c\n" +
+	"\tdevice_id\x18\x02 \x01(\tR\tdevice_id\x12E\n" +
+	"\x13supported_protocols\x18\x03 \x03(\x0e2\x13.device.v1.ProtocolR\x13supported_protocols\x12\"\n" +
 	"\farchitecture\x18\x04 \x01(\tR\farchitecture\x12\x0e\n" +
 	"\x02os\x18\x05 \x01(\tR\x02os\"\x14\n" +
-	"\x12DiagnosticsRequest\"\x87\x03\n" +
+	"\x12DiagnosticsRequest\"\x8e\x03\n" +
 	"\x13DiagnosticsResponse\x128\n" +
-	"\ttimestamp\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\x12\x1b\n" +
-	"\tdevice_id\x18\x02 \x01(\tR\bdeviceId\x12)\n" +
-	"\x10hardware_version\x18\x03 \x01(\tR\x0fhardwareVersion\x12)\n" +
-	"\x10software_version\x18\x04 \x01(\tR\x0fsoftwareVersion\x12)\n" +
-	"\x10firmware_version\x18\x05 \x01(\tR\x0ffirmwareVersion\x12\x1b\n" +
-	"\tcpu_usage\x18\x06 \x01(\x01R\bcpuUsage\x12!\n" +
-	"\fmemory_usage\x18\a \x01(\x01R\vmemoryUsage\x12<\n" +
-	"\rdevice_status\x18\b \x01(\x0e2\x17.device.v1.DeviceStatusR\fdeviceStatus\x12\x1a\n" +
-	"\bchecksum\x18\t \x01(\tR\bchecksum\"S\n" +
-	"\x13UpdateDeviceRequest\x12<\n" +
-	"\rdevice_status\x18\x01 \x01(\x0e2\x17.device.v1.DeviceStatusR\fdeviceStatus\"\x16\n" +
-	"\x14UpdateDeviceResponse*J\n" +
+	"\ttimestamp\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\x12\x1c\n" +
+	"\tdevice_id\x18\x02 \x01(\tR\tdevice_id\x12*\n" +
+	"\x10hardware_version\x18\x03 \x01(\tR\x10hardware_version\x12*\n" +
+	"\x10software_version\x18\x04 \x01(\tR\x10software_version\x12*\n" +
+	"\x10firmware_version\x18\x05 \x01(\tR\x10firmware_version\x12\x1c\n" +
+	"\tcpu_usage\x18\x06 \x01(\x01R\tcpu_usage\x12\"\n" +
+	"\fmemory_usage\x18\a \x01(\x01R\fmemory_usage\x12=\n" +
+	"\rdevice_status\x18\b \x01(\x0e2\x17.device.v1.DeviceStatusR\rdevice_status\x12\x1a\n" +
+	"\bchecksum\x18\t \x01(\tR\bchecksum\"T\n" +
+	"\x13UpdateDeviceRequest\x12=\n" +
+	"\rdevice_status\x18\x01 \x01(\x0e2\x17.device.v1.DeviceStatusR\rdevice_status\"\x16\n" +
+	"\x14UpdateDeviceResponse*~\n" +
 	"\bProtocol\x12\x18\n" +
 	"\x14PROTOCOL_UNSPECIFIED\x10\x00\x12\x11\n" +
-	"\rPROTOCOL_HTTP\x10\x01\x12\x11\n" +
-	"\rPROTOCOL_GRPC\x10\x02*\xb7\x01\n" +
+	"\rPROTOCOL_HTTP\x10\x01\x12\x18\n" +
+	"\x14PROTOCOL_HTTP_STREAM\x10\x02\x12\x11\n" +
+	"\rPROTOCOL_GRPC\x10\x03\x12\x18\n" +
+	"\x14PROTOCOL_GRPC_STREAM\x10\x04*\xb7\x01\n" +
 	"\fDeviceStatus\x12\x1d\n" +
 	"\x19DEVICE_STATUS_UNSPECIFIED\x10\x00\x12\x19\n" +
 	"\x15DEVICE_STATUS_HEALTHY\x10\x01\x12\x1a\n" +

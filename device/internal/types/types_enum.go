@@ -97,8 +97,12 @@ func ParseEnvironment(name string) (Environment, error) {
 const (
 	// ProtocolHttp is a Protocol of type http.
 	ProtocolHttp Protocol = "http"
+	// ProtocolHttpStream is a Protocol of type http-stream.
+	ProtocolHttpStream Protocol = "http-stream"
 	// ProtocolGrpc is a Protocol of type grpc.
 	ProtocolGrpc Protocol = "grpc"
+	// ProtocolGrpcStream is a Protocol of type grpc-stream.
+	ProtocolGrpcStream Protocol = "grpc-stream"
 )
 
 var ErrInvalidProtocol = errors.New("not a valid Protocol")
@@ -116,8 +120,10 @@ func (x Protocol) IsValid() bool {
 }
 
 var _ProtocolValue = map[string]Protocol{
-	"http": ProtocolHttp,
-	"grpc": ProtocolGrpc,
+	"http":        ProtocolHttp,
+	"http-stream": ProtocolHttpStream,
+	"grpc":        ProtocolGrpc,
+	"grpc-stream": ProtocolGrpcStream,
 }
 
 // ParseProtocol attempts to convert a string to a Protocol.

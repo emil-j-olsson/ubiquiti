@@ -1,0 +1,66 @@
+version: "3.9"
+name: "ubiquiti"
+services:
+  device-router:
+    platform: linux/arm64
+    build:
+      context: ./device
+      dockerfile: Dockerfile
+      args:
+        BASE_IMAGE: alpine:3.22.2
+    container_name: ubiquiti-device-router
+    environment:
+      - DEVICE_IDENTIFIER=ubiquiti-device-router-3c2d
+      - DEVICE_PROTOCOLS=grpc
+      - DEVICE_VERSION_HARDWARE=HW:4.4.6
+      - DEVICE_VERSION_SOFTWARE=SW:alpine:3.22.2:arm64
+      - DEVICE_VERSION_FIRMWARE=FW:4.3.20.11298
+    ports:
+      - "8084:8080"
+      - "8085:8081"
+    networks:
+      - ubiquiti-network
+
+  device-switch:
+    platform: linux/amd64
+    build:
+      context: ./device
+      dockerfile: Dockerfile
+      args:
+        BASE_IMAGE: ubuntu:22.04
+    container_name: ubiquiti-device-switch
+    environment:
+      - DEVICE_IDENTIFIER=ubiquiti-device-switch-b87f
+      - DEVICE_PROTOCOLS=grpc-stream
+      - DEVICE_VERSION_HARDWARE=HW:2.9.3
+      - DEVICE_VERSION_SOFTWARE=SW:ubuntu:22.04:amd64
+      - DEVICE_VERSION_FIRMWARE=FW:5.11.0.11599
+    ports:
+      - "8086:8080"
+      - "8087:8081"
+    networks:
+      - ubiquiti-network
+
+  device-access-point:
+    platform: linux/arm/v7
+    build:
+      context: ./device
+      dockerfile: Dockerfile
+      args:
+        BASE_IMAGE: debian:bullseye-slim
+    container_name: ubiquiti-device-access-point
+    environment:
+      - DEVICE_IDENTIFIER=ubiquiti-device-access-point-05da
+      - DEVICE_PROTOCOLS=http
+      - DEVICE_VERSION_HARDWARE=HW:6.6.1
+      - DEVICE_VERSION_SOFTWARE=SW:debian:bullseye-slim:armv7
+      - DEVICE_VERSION_FIRMWARE=FW:5.43.23.12533
+    ports:
+      - "8088:8080"
+      - "8089:8081"
+    networks:
+      - ubiquiti-network
+
+networks:
+  ubiquiti-network:
+    driver: bridge
