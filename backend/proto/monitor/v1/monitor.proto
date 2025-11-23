@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package monitor.v1;
+option go_package = "github.com/emil-j-olsson/ubiquiti/backend/proto/monitor/v1;monitorv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+service Monitor {
+    rpc GetHealth(google.protobuf.Empty) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            get: "/v1/health"
+        };
+    }
+}
+
+// set state in device... passthrough

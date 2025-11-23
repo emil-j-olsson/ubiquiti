@@ -6,7 +6,7 @@ dev/up:
 	$(DOCKER_COMPOSE_CMD) -f docker-compose.yaml up -d
 
 dev/rebuild:
-	$(DOCKER_COMPOSE_CMD) -f docker-compose.yaml up -d --build
+	$(DOCKER_COMPOSE_CMD) -f docker-compose.yaml up -d --build --remove-orphans
 
 dev/down:
 	$(DOCKER_COMPOSE_CMD) -f docker-compose.yaml down -v
@@ -34,6 +34,7 @@ generate/env:
 
 generate:
 	go generate ./device/...
+	go generate ./backend/...
 
 .PHONY: git/hooks
 git/hooks:

@@ -1,7 +1,26 @@
 version: "3.9"
-name: "ubiquiti"
+name: ubiquiti
 services:
-  device-router:
+  ubiquiti-postgres:
+    image: postgres:15-alpine
+    container_name: ubiquiti-postgres
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_DB=ubiquiti
+    volumes:
+      - ./state:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d ubiquiti"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - 5432:5432
+    networks:
+      - ubiquiti-network
+
+  ubiquiti-device-router:
     platform: linux/arm64
     build:
       context: ./device
@@ -16,12 +35,12 @@ services:
       - DEVICE_VERSION_SOFTWARE=SW:alpine:3.22.2:arm64
       - DEVICE_VERSION_FIRMWARE=FW:4.3.20.11298
     ports:
-      - "8084:8080"
-      - "8085:8081"
+      - 8084:8080
+      - 8085:8081
     networks:
       - ubiquiti-network
 
-  device-switch:
+  ubiquiti-device-switch:
     platform: linux/amd64
     build:
       context: ./device
@@ -36,12 +55,12 @@ services:
       - DEVICE_VERSION_SOFTWARE=SW:ubuntu:22.04:amd64
       - DEVICE_VERSION_FIRMWARE=FW:5.11.0.11599
     ports:
-      - "8086:8080"
-      - "8087:8081"
+      - 8086:8080
+      - 8087:8081
     networks:
       - ubiquiti-network
 
-  device-access-point:
+  ubiquiti-device-access-point:
     platform: linux/arm/v7
     build:
       context: ./device
@@ -56,8 +75,58 @@ services:
       - DEVICE_VERSION_SOFTWARE=SW:debian:bullseye-slim:armv7
       - DEVICE_VERSION_FIRMWARE=FW:5.43.23.12533
     ports:
-      - "8088:8080"
-      - "8089:8081"
+      - 8088:8080
+      - 8089:8081
+    networks:
+      - ubiquiti-network
+
+  ubiquiti-monitor-arm:
+    platform: linux/arm64
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        BASE_IMAGE: alpine:3.22.2 
+    container_name: ubiquiti-monitor-arm
+    environment:
+      - MONITOR_POSTGRES_CONNECTION_STRING=postgres://user@localhost:5432/ubiquiti?sslmode=disable
+    depends_on:
+      ubiquiti-postgres:
+        condition: service_healthy
+      ubiquiti-device-router:
+        condition: service_started
+      ubiquiti-device-switch:
+        condition: service_started
+      ubiquiti-device-access-point:
+        condition: service_started
+    ports:
+      - 8080:8080
+      - 8081:8081
+    networks:
+      - ubiquiti-network
+
+  ubiquiti-monitor-amd:
+    platform: linux/amd64
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        BASE_IMAGE: ubuntu:22.04
+    container_name: ubiquiti-monitor-amd
+    environment:
+      - MONITOR_POSTGRES_CONNECTION_STRING=postgres://user@localhost:5432/ubiquiti?sslmode=disable
+    depends_on:
+      ubiquiti-postgres:
+        condition: service_healthy
+      ubiquiti-device-router:
+        condition: service_started
+      ubiquiti-device-switch:
+        condition: service_started
+      ubiquiti-device-access-point:
+        condition: service_started
+    ports:
+      - 8082:8080
+      - 8083:8081
     networks:
       - ubiquiti-network
 
