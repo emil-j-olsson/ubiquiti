@@ -2,19 +2,12 @@ package database
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
+	"github.com/emil-j-olsson/ubiquiti/backend/internal/database/exceptions"
 	"github.com/emil-j-olsson/ubiquiti/backend/internal/database/postgres"
 	"github.com/emil-j-olsson/ubiquiti/backend/internal/types"
 	"go.uber.org/zap"
-)
-
-var (
-	ErrorNotFound         = errors.New("not found")
-	ErrorInternal         = errors.New("internal error")
-	ErrorUnspecifiedField = errors.New("unspecified field")
-	ErrorInvalidType      = errors.New("invalid type")
 )
 
 type Pool interface {
@@ -49,10 +42,10 @@ func NewDatabaseModel(ctx context.Context, logger *zap.Logger) *model {
 func (m *model) AddDatabaseConnections(config ...Config) (*model, error) {
 	for _, cfg := range config {
 		if !cfg.Database.IsValid() {
-			return nil, fmt.Errorf("%w: database", ErrorUnspecifiedField)
+			return nil, fmt.Errorf("%w: database", exceptions.ErrorUnspecifiedField)
 		}
 		if !cfg.Instance.IsValid() {
-			return nil, fmt.Errorf("%w: instance", ErrorUnspecifiedField)
+			return nil, fmt.Errorf("%w: instance", exceptions.ErrorUnspecifiedField)
 		}
 		switch cfg.Database {
 		case types.DatabasePostgres:
@@ -86,7 +79,11 @@ func GetDatabaseConnection[T Pool](m *model, instance types.DatabaseInstance) (T
 		if typedPool, ok := conn.pool.(T); ok {
 			return typedPool, nil
 		}
-		return zero, fmt.Errorf("%w: connection exists but is not of type %T", ErrorInvalidType, zero)
+		return zero, fmt.Errorf(
+			"%w: connection exists but is not of type %T",
+			exceptions.ErrorInvalidType,
+			zero,
+		)
 	}
-	return zero, ErrorNotFound
+	return zero, exceptions.ErrorNotFound
 }

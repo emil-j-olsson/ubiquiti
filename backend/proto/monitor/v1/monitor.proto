@@ -13,6 +13,97 @@ service Monitor {
             get: "/v1/health"
         };
     }
+    rpc RegisterDevice(RegisterDeviceRequest) returns (RegisterDeviceResponse) {
+        option (google.api.http) = {
+            post: "/v1/devices/{device_id}"
+            body: "*"
+        };
+    }
+    rpc ListDevices(google.protobuf.Empty) returns (ListDevicesResponse) {
+        option (google.api.http) = {
+            get: "/v1/devices"
+        };
+    }
+    rpc GetDiagnostics(DiagnosticsRequest) returns (DiagnosticsResponse) {
+        option (google.api.http) = {
+            get: "/v1/diagnostics/{device_id}"
+        };
+    }
+    rpc StreamDiagnostics(DiagnosticsRequest) returns (stream DiagnosticsResponse) {
+        option (google.api.http) = {
+            get: "/v1/diagnostics/{device_id}/stream"
+        };
+    }
+    rpc UpdateSimulatedDevice(UpdateSimulatedDeviceRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            patch: "/v1/devices/{device_id}/simulation"
+            body: "*"
+        };
+    }
 }
 
-// set state in device... passthrough
+enum Protocol {
+    PROTOCOL_UNSPECIFIED = 0;
+    PROTOCOL_HTTP = 1;
+    PROTOCOL_HTTP_STREAM = 2;
+    PROTOCOL_GRPC = 3;
+    PROTOCOL_GRPC_STREAM = 4;
+}
+
+enum DeviceStatus {
+    DEVICE_STATUS_UNSPECIFIED = 0;
+    DEVICE_STATUS_HEALTHY = 1;
+    DEVICE_STATUS_DEGRADED = 2;
+    DEVICE_STATUS_ERROR = 3;
+    DEVICE_STATUS_MAINTENANCE = 4;
+    DEVICE_STATUS_BOOTING = 5;
+}
+
+message Device {
+    string id = 1 [json_name="id"];
+    string device_id = 2 [json_name="device_id"];
+    string alias = 3;
+    string architecture = 4;
+    string os = 5;
+    repeated Protocol supported_protocols = 6 [json_name="supported_protocols"];
+    google.protobuf.Timestamp created_at = 7 [json_name="created_at"];
+    google.protobuf.Timestamp updated_at = 8 [json_name="updated_at"];
+}
+
+message Diagnostics {
+    string hardware_version = 1 [json_name="hardware_version"];
+    string software_version = 2 [json_name="software_version"];
+    string firmware_version = 3 [json_name="firmware_version"];
+    double cpu_usage = 4 [json_name="cpu_usage"];
+    double memory_usage = 5 [json_name="memory_usage"];
+    DeviceStatus device_status = 6 [json_name="device_status"];
+    string checksum = 7;
+}
+
+message RegisterDeviceRequest {
+    string device_id = 1 [json_name="device_id"]; 
+}
+
+message RegisterDeviceResponse {
+    Device device = 1;
+}
+
+message ListDevicesResponse {
+    repeated Device devices = 1;
+}
+
+message DiagnosticsRequest {
+    string device_id = 1 [json_name="device_id"];
+}
+
+message DiagnosticsResponse {
+    Device device = 1;
+    Diagnostics diagnostics = 2;
+    google.protobuf.Timestamp updated_at = 3 [json_name="updated_at"];
+}
+
+
+message UpdateSimulatedDeviceRequest {
+    string device_id = 1 [json_name="device_id"];
+    DeviceStatus device_status = 2 [json_name="device_status"];
+}

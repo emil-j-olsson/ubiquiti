@@ -3,6 +3,8 @@ package types
 import (
 	"runtime"
 	"time"
+
+	monitorv1 "github.com/emil-j-olsson/ubiquiti/backend/proto/monitor/v1"
 )
 
 var (
@@ -22,7 +24,7 @@ type Config struct {
 	GatewayHost    string        `envconfig:"GATEWAY_HOST"    default:"localhost"`
 	Identifier     string        `envconfig:"IDENTIFIER"      default:"monitor-001"`
 	StreamInterval time.Duration `envconfig:"STREAM_INTERVAL" default:"500ms"`
-	Persistence    Persistence
+	Persistence    Persistence   `envconfig:"PERSISTENCE"`
 }
 
 type Persistence struct {
@@ -32,6 +34,36 @@ type Persistence struct {
 type Postgres struct {
 	ConnectionString string `envconfig:"CONNECTION_STRING"`
 	MaxPoolSize      int32  `envconfig:"MAX_POOL_SIZE"     default:"10"`
+}
+
+type Device struct {
+	ID                 *string    `db:"id"`
+	Identifier         *string    `db:"device_id"`
+	Alias              *string    `db:"alias"`
+	Architecture       *string    `db:"architecture"`
+	OS                 *string    `db:"os"`
+	SupportedProtocols *[]string  `db:"supported_protocols"`
+	Created            *time.Time `db:"created_at"`
+	Updated            *time.Time `db:"updated_at"`
+}
+
+type Diagnostics struct {
+	ID                 *string    `db:"id"`
+	Identifier         *string    `db:"device_id"`
+	Alias              *string    `db:"alias"`
+	Architecture       *string    `db:"architecture"`
+	OS                 *string    `db:"os"`
+	SupportedProtocols *[]string  `db:"supported_protocols"`
+	Hardware           *string    `db:"hardware_version"`
+	Software           *string    `db:"software_version"`
+	Firmware           *string    `db:"firmware_version"`
+	CPU                *float64   `db:"cpu_usage"`
+	Memory             *float64   `db:"memory_usage"`
+	DeviceStatus       *string    `db:"device_status"`
+	Checksum           *string    `db:"checksum"`
+	LastUpdated        *time.Time `db:"last_updated"`
+	Created            *time.Time `db:"created_at"`
+	Updated            *time.Time `db:"updated_at"`
 }
 
 //go:generate go-enum
@@ -56,3 +88,78 @@ type Database string
 
 // ENUM(ubiquiti)
 type DatabaseInstance string
+
+/*
+ENUM(
+
+	healthy = DEVICE_STATUS_HEALTHY
+	degraded = DEVICE_STATUS_DEGRADED
+	error = DEVICE_STATUS_ERROR
+	maintenance = DEVICE_STATUS_MAINTENANCE
+	booting = DEVICE_STATUS_BOOTING
+
+)
+*/
+type DeviceStatus string
+
+func (d *DeviceStatus) Proto() monitorv1.DeviceStatus {
+	switch *d {
+	case DeviceStatusHealthy:
+		return monitorv1.DeviceStatus_DEVICE_STATUS_HEALTHY
+	case DeviceStatusDegraded:
+		return monitorv1.DeviceStatus_DEVICE_STATUS_DEGRADED
+	case DeviceStatusError:
+		return monitorv1.DeviceStatus_DEVICE_STATUS_ERROR
+	case DeviceStatusMaintenance:
+		return monitorv1.DeviceStatus_DEVICE_STATUS_MAINTENANCE
+	case DeviceStatusBooting:
+		return monitorv1.DeviceStatus_DEVICE_STATUS_BOOTING
+	default:
+		return monitorv1.DeviceStatus_DEVICE_STATUS_UNSPECIFIED
+	}
+}
+
+func DeviceStatusFromString(value string) DeviceStatus {
+	parsed, err := ParseDeviceStatus(value)
+	if err != nil {
+		return DeviceStatus("")
+	}
+	return parsed
+}
+
+/*
+ENUM(
+
+	http = PROTOCOL_HTTP
+	http-stream = PROTOCOL_HTTP_STREAM
+	grpc = PROTOCOL_GRPC
+	grpc-stream = PROTOCOL_GRPC_STREAM
+
+)
+*/
+type Protocol string
+
+func (p *Protocol) Proto() monitorv1.Protocol {
+	switch *p {
+	case ProtocolHttp:
+		return monitorv1.Protocol_PROTOCOL_HTTP
+	case ProtocolHttpStream:
+		return monitorv1.Protocol_PROTOCOL_HTTP_STREAM
+	case ProtocolGrpc:
+		return monitorv1.Protocol_PROTOCOL_GRPC
+	case ProtocolGrpcStream:
+		return monitorv1.Protocol_PROTOCOL_GRPC_STREAM
+	default:
+		return monitorv1.Protocol_PROTOCOL_UNSPECIFIED
+	}
+}
+
+func ProtocolFromStrings(values []string) []monitorv1.Protocol {
+	result := make([]monitorv1.Protocol, 0, len(values))
+	for _, value := range values {
+		if p, err := ParseProtocol(value); err == nil {
+			result = append(result, p.Proto())
+		}
+	}
+	return result
+}

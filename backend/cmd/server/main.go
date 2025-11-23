@@ -14,6 +14,7 @@ import (
 	"github.com/emil-j-olsson/ubiquiti/backend/internal/database/postgres"
 	"github.com/emil-j-olsson/ubiquiti/backend/internal/logging"
 	"github.com/emil-j-olsson/ubiquiti/backend/internal/server"
+	"github.com/emil-j-olsson/ubiquiti/backend/internal/service"
 	"github.com/emil-j-olsson/ubiquiti/backend/internal/types"
 	monitorv1 "github.com/emil-j-olsson/ubiquiti/backend/proto/monitor/v1"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -68,6 +69,8 @@ func run() error {
 	)
 	defer cancel()
 
+	// TODO: Need to connect to devices... then pass that connection to workers? And... passthrough
+
 	// Persistence Layer
 	model, err := database.NewDatabaseModel(ctx, logger).AddDatabaseConnections(
 		database.Config{
@@ -90,13 +93,12 @@ func run() error {
 	if err != nil {
 		return err
 	}
-
-	// TODO: use repositories
-	postgres.NewDeviceWorkerRepository(pool, logger)
-	postgres.NewStateRetrieverRepository(pool, logger)
+	device := postgres.NewDeviceWorkerRepository(pool, logger)
+	state := postgres.NewStateRetrieverRepository(pool, logger)
 
 	// Application Layer
-	monitorServer := server.NewMonitorServer(logger)
+	monitorService := service.NewMonitorService(state, device, config, logger)
+	monitorServer := server.NewMonitorServer(monitorService, logger)
 
 	// Server Lifecycle
 	g, gctx := errgroup.WithContext(ctx)

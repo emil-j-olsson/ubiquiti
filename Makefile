@@ -27,6 +27,7 @@ fmt: $(GOPATH)/bin/goimports $(GOPATH)/bin/golines
 .PHONY: lint
 lint: $(GOPATH)/bin/golangci-lint
 	golangci-lint run ./device/...
+	golangci-lint run ./backend/...
 
 .PHONY: generate/env generate
 generate/env:

@@ -71,7 +71,7 @@ func run() error {
 	// Application Layer
 	deviceState := cache.NewDeviceState(config)
 	deviceService := service.NewDeviceService(deviceState)
-	deviceServer := server.NewDeviceServer(logger, deviceService)
+	deviceServer := server.NewDeviceServer(deviceService, logger)
 
 	// Server Lifecycle
 	g, gctx := errgroup.WithContext(ctx)

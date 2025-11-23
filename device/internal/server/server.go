@@ -33,14 +33,14 @@ type Provider interface {
 
 type Server struct {
 	devicev1.UnimplementedDeviceServer
-	logger   *zap.Logger
 	provider Provider
+	logger   *zap.Logger
 }
 
-func NewDeviceServer(logger *zap.Logger, provider Provider) *Server {
+func NewDeviceServer(provider Provider, logger *zap.Logger) *Server {
 	return &Server{
-		logger:   logger,
 		provider: provider,
+		logger:   logger,
 	}
 }
 

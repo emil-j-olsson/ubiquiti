@@ -74,6 +74,49 @@ func ParseDatabaseInstance(name string) (DatabaseInstance, error) {
 }
 
 const (
+	// DeviceStatusHealthy is a DeviceStatus of type healthy.
+	DeviceStatusHealthy DeviceStatus = "DEVICE_STATUS_HEALTHY"
+	// DeviceStatusDegraded is a DeviceStatus of type degraded.
+	DeviceStatusDegraded DeviceStatus = "DEVICE_STATUS_DEGRADED"
+	// DeviceStatusError is a DeviceStatus of type error.
+	DeviceStatusError DeviceStatus = "DEVICE_STATUS_ERROR"
+	// DeviceStatusMaintenance is a DeviceStatus of type maintenance.
+	DeviceStatusMaintenance DeviceStatus = "DEVICE_STATUS_MAINTENANCE"
+	// DeviceStatusBooting is a DeviceStatus of type booting.
+	DeviceStatusBooting DeviceStatus = "DEVICE_STATUS_BOOTING"
+)
+
+var ErrInvalidDeviceStatus = errors.New("not a valid DeviceStatus")
+
+// String implements the Stringer interface.
+func (x DeviceStatus) String() string {
+	return string(x)
+}
+
+// IsValid provides a quick way to determine if the typed value is
+// part of the allowed enumerated values
+func (x DeviceStatus) IsValid() bool {
+	_, err := ParseDeviceStatus(string(x))
+	return err == nil
+}
+
+var _DeviceStatusValue = map[string]DeviceStatus{
+	"DEVICE_STATUS_HEALTHY":     DeviceStatusHealthy,
+	"DEVICE_STATUS_DEGRADED":    DeviceStatusDegraded,
+	"DEVICE_STATUS_ERROR":       DeviceStatusError,
+	"DEVICE_STATUS_MAINTENANCE": DeviceStatusMaintenance,
+	"DEVICE_STATUS_BOOTING":     DeviceStatusBooting,
+}
+
+// ParseDeviceStatus attempts to convert a string to a DeviceStatus.
+func ParseDeviceStatus(name string) (DeviceStatus, error) {
+	if x, ok := _DeviceStatusValue[name]; ok {
+		return x, nil
+	}
+	return DeviceStatus(""), fmt.Errorf("%s is %w", name, ErrInvalidDeviceStatus)
+}
+
+const (
 	// EnvironmentTest is a Environment of type test.
 	EnvironmentTest Environment = "test"
 	// EnvironmentDevelopment is a Environment of type development.
@@ -116,8 +159,6 @@ func ParseEnvironment(name string) (Environment, error) {
 const (
 	// PostgresConnectionProxy is a PostgresConnection of type proxy.
 	PostgresConnectionProxy PostgresConnection = "proxy"
-	// PostgresConnectionInstance is a PostgresConnection of type instance.
-	PostgresConnectionInstance PostgresConnection = "instance"
 )
 
 var ErrInvalidPostgresConnection = errors.New("not a valid PostgresConnection")
@@ -135,8 +176,7 @@ func (x PostgresConnection) IsValid() bool {
 }
 
 var _PostgresConnectionValue = map[string]PostgresConnection{
-	"proxy":    PostgresConnectionProxy,
-	"instance": PostgresConnectionInstance,
+	"proxy": PostgresConnectionProxy,
 }
 
 // ParsePostgresConnection attempts to convert a string to a PostgresConnection.
@@ -145,4 +185,44 @@ func ParsePostgresConnection(name string) (PostgresConnection, error) {
 		return x, nil
 	}
 	return PostgresConnection(""), fmt.Errorf("%s is %w", name, ErrInvalidPostgresConnection)
+}
+
+const (
+	// ProtocolHttp is a Protocol of type http.
+	ProtocolHttp Protocol = "PROTOCOL_HTTP"
+	// ProtocolHttpStream is a Protocol of type http-stream.
+	ProtocolHttpStream Protocol = "PROTOCOL_HTTP_STREAM"
+	// ProtocolGrpc is a Protocol of type grpc.
+	ProtocolGrpc Protocol = "PROTOCOL_GRPC"
+	// ProtocolGrpcStream is a Protocol of type grpc-stream.
+	ProtocolGrpcStream Protocol = "PROTOCOL_GRPC_STREAM"
+)
+
+var ErrInvalidProtocol = errors.New("not a valid Protocol")
+
+// String implements the Stringer interface.
+func (x Protocol) String() string {
+	return string(x)
+}
+
+// IsValid provides a quick way to determine if the typed value is
+// part of the allowed enumerated values
+func (x Protocol) IsValid() bool {
+	_, err := ParseProtocol(string(x))
+	return err == nil
+}
+
+var _ProtocolValue = map[string]Protocol{
+	"PROTOCOL_HTTP":        ProtocolHttp,
+	"PROTOCOL_HTTP_STREAM": ProtocolHttpStream,
+	"PROTOCOL_GRPC":        ProtocolGrpc,
+	"PROTOCOL_GRPC_STREAM": ProtocolGrpcStream,
+}
+
+// ParseProtocol attempts to convert a string to a Protocol.
+func ParseProtocol(name string) (Protocol, error) {
+	if x, ok := _ProtocolValue[name]; ok {
+		return x, nil
+	}
+	return Protocol(""), fmt.Errorf("%s is %w", name, ErrInvalidProtocol)
 }

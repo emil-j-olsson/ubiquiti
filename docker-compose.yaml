@@ -89,7 +89,7 @@ services:
         BASE_IMAGE: alpine:3.22.2 
     container_name: ubiquiti-monitor-arm
     environment:
-      - MONITOR_POSTGRES_CONNECTION_STRING=postgres://user@localhost:5432/ubiquiti?sslmode=disable
+      - MONITOR_PERSISTENCE_POSTGRES_CONNECTION_STRING=postgres://user@ubiquiti-postgres:5432/ubiquiti?sslmode=disable
     depends_on:
       ubiquiti-postgres:
         condition: service_healthy
@@ -114,7 +114,7 @@ services:
         BASE_IMAGE: ubuntu:22.04
     container_name: ubiquiti-monitor-amd
     environment:
-      - MONITOR_POSTGRES_CONNECTION_STRING=postgres://user@localhost:5432/ubiquiti?sslmode=disable
+      - MONITOR_PERSISTENCE_POSTGRES_CONNECTION_STRING=postgres://user@ubiquiti-postgres:5432/ubiquiti?sslmode=disable
     depends_on:
       ubiquiti-postgres:
         condition: service_healthy
