@@ -83,8 +83,8 @@ services:
   ubiquiti-monitor-arm:
     platform: linux/arm64
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./backend/Dockerfile
       args:
         BASE_IMAGE: alpine:3.22.2 
     container_name: ubiquiti-monitor-arm
@@ -108,8 +108,8 @@ services:
   ubiquiti-monitor-amd:
     platform: linux/amd64
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./backend/Dockerfile
       args:
         BASE_IMAGE: ubuntu:22.04
     container_name: ubiquiti-monitor-amd

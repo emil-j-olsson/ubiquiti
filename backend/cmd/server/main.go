@@ -12,6 +12,7 @@ import (
 
 	"github.com/emil-j-olsson/ubiquiti/backend/internal/database"
 	"github.com/emil-j-olsson/ubiquiti/backend/internal/database/postgres"
+	"github.com/emil-j-olsson/ubiquiti/backend/internal/device"
 	"github.com/emil-j-olsson/ubiquiti/backend/internal/logging"
 	"github.com/emil-j-olsson/ubiquiti/backend/internal/server"
 	"github.com/emil-j-olsson/ubiquiti/backend/internal/service"
@@ -69,8 +70,6 @@ func run() error {
 	)
 	defer cancel()
 
-	// TODO: Need to connect to devices... then pass that connection to workers? And... passthrough
-
 	// Persistence Layer
 	model, err := database.NewDatabaseModel(ctx, logger).AddDatabaseConnections(
 		database.Config{
@@ -88,16 +87,17 @@ func run() error {
 		return err
 	}
 	defer model.Close()
-
 	pool, err := model.GetPostgresPool(types.DatabaseInstanceUbiquiti)
 	if err != nil {
 		return err
 	}
-	device := postgres.NewDeviceWorkerRepository(pool, logger)
-	state := postgres.NewStateRetrieverRepository(pool, logger)
+	persistence := postgres.NewPersistenceRepository(pool, logger)
+
+	// External Clients
+	factory := device.NewClientFactory()
 
 	// Application Layer
-	monitorService := service.NewMonitorService(state, device, config, logger)
+	monitorService := service.NewMonitorService(persistence, factory, config, logger)
 	monitorServer := server.NewMonitorServer(monitorService, logger)
 
 	// Server Lifecycle

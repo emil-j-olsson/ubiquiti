@@ -12,35 +12,73 @@ import (
 	"go.uber.org/zap"
 )
 
-// Device Worker Repository
-type DeviceWorkerRepository struct {
+// Persistence Repository
+type PersistenceRepository struct {
 	pool   *pgxpool.Pool
 	logger *zap.Logger
 }
 
-func NewDeviceWorkerRepository(pool *pgxpool.Pool, logger *zap.Logger) *DeviceWorkerRepository {
-	return &DeviceWorkerRepository{
+func NewPersistenceRepository(pool *pgxpool.Pool, logger *zap.Logger) *PersistenceRepository {
+	return &PersistenceRepository{
 		pool:   pool,
 		logger: logger,
 	}
 }
 
-func (r *DeviceWorkerRepository) GetSomething() {}
-
-// State Retriever Repository
-type StateRetrieverRepository struct {
-	pool   *pgxpool.Pool
-	logger *zap.Logger
-}
-
-func NewStateRetrieverRepository(pool *pgxpool.Pool, logger *zap.Logger) *StateRetrieverRepository {
-	return &StateRetrieverRepository{
-		pool:   pool,
-		logger: logger,
+func (r *PersistenceRepository) RegisterDevice(
+	ctx context.Context,
+	status types.DeviceHealthStatus,
+	reg types.DeviceRegistration,
+) (types.Device, error) {
+	protocols := make([]string, len(status.SupportedProtocols))
+	for i, p := range status.SupportedProtocols {
+		protocols[i] = p.String()
 	}
+	rows, err := r.pool.Query(ctx, `
+		insert into devices (
+			device_id, alias, host, port, port_gateway, architecture, os, supported_protocols
+		) values (
+			$1, $2, $3, $4, $5, $6, $7, $8
+		)
+		on conflict (device_id) do update set
+			alias = excluded.alias,
+			host = excluded.host,
+			port = excluded.port,
+			port_gateway = excluded.port_gateway,
+			architecture = excluded.architecture,
+			os = excluded.os,
+			supported_protocols = excluded.supported_protocols,
+			updated_at = excluded.updated_at
+		returning *
+	`,
+		status.Identifier,
+		reg.Alias,
+		reg.Host,
+		reg.Port,
+		reg.GatewayPort,
+		status.Architecture,
+		status.OS,
+		protocols,
+	)
+	if err != nil {
+		return types.Device{}, fmt.Errorf(
+			"%w: failed to insert device rows (postgres): %w",
+			exceptions.ErrorInternal,
+			err,
+		)
+	}
+	result, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[types.Device])
+	if err != nil {
+		return types.Device{}, fmt.Errorf(
+			"%w: failed to collect device rows (postgres): %w",
+			exceptions.ErrorInternal,
+			err,
+		)
+	}
+	return result, nil
 }
 
-func (r *StateRetrieverRepository) ListDevices(ctx context.Context) ([]types.Device, error) {
+func (r *PersistenceRepository) ListDevices(ctx context.Context) ([]types.Device, error) {
 	rows, err := r.pool.Query(ctx, `select * from devices order by created_at desc`)
 	if err != nil {
 		return nil, fmt.Errorf("%w: failed to query devices (postgres): %w", exceptions.ErrorInternal, err)
@@ -56,7 +94,7 @@ func (r *StateRetrieverRepository) ListDevices(ctx context.Context) ([]types.Dev
 	return result, nil
 }
 
-func (r *StateRetrieverRepository) GetDiagnostics(
+func (r *PersistenceRepository) GetDiagnostics(
 	ctx context.Context,
 	device string,
 ) (types.Diagnostics, error) {

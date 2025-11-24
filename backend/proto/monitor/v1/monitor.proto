@@ -63,11 +63,14 @@ message Device {
     string id = 1 [json_name="id"];
     string device_id = 2 [json_name="device_id"];
     string alias = 3;
-    string architecture = 4;
-    string os = 5;
-    repeated Protocol supported_protocols = 6 [json_name="supported_protocols"];
-    google.protobuf.Timestamp created_at = 7 [json_name="created_at"];
-    google.protobuf.Timestamp updated_at = 8 [json_name="updated_at"];
+    string host = 4;
+    int64 port = 5;
+    int64 port_gateway = 6 [json_name="port_gateway"];
+    string architecture = 7;
+    string os = 8;
+    repeated Protocol supported_protocols = 9 [json_name="supported_protocols"];
+    google.protobuf.Timestamp created_at = 10 [json_name="created_at"];
+    google.protobuf.Timestamp updated_at = 11 [json_name="updated_at"];
 }
 
 message Diagnostics {
@@ -82,6 +85,11 @@ message Diagnostics {
 
 message RegisterDeviceRequest {
     string device_id = 1 [json_name="device_id"]; 
+    string alias = 2;
+    string host = 3;
+    int64 port = 4;
+    int64 port_gateway = 5 [json_name="port_gateway"];
+    Protocol protocol = 6;
 }
 
 message RegisterDeviceResponse {
@@ -101,7 +109,6 @@ message DiagnosticsResponse {
     Diagnostics diagnostics = 2;
     google.protobuf.Timestamp updated_at = 3 [json_name="updated_at"];
 }
-
 
 message UpdateSimulatedDeviceRequest {
     string device_id = 1 [json_name="device_id"];

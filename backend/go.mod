@@ -3,6 +3,7 @@ module github.com/emil-j-olsson/ubiquiti/backend
 go 1.24.10
 
 require (
+	github.com/emil-j-olsson/ubiquiti/device v0.0.0-00010101000000-000000000000
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3
 	github.com/jackc/pgx/v5 v5.7.6
 	github.com/joho/godotenv v1.5.1
@@ -25,3 +26,5 @@ require (
 	golang.org/x/text v0.30.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251103181224-f26f9409b101 // indirect
 )
+
+replace github.com/emil-j-olsson/ubiquiti/device => ../device

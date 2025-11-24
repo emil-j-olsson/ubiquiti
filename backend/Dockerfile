@@ -10,18 +10,23 @@ WORKDIR /workspace
 
 RUN apk add --no-cache git make
 
-COPY go.mod go.sum ./
-RUN go mod download
+COPY go.work go.work.sum* ./
 
-COPY . .
+COPY device/go.mod device/go.sum ./device/
+COPY device/ ./device/
 
-RUN GOOS=$TARGETOS GOARCH=$TARGETARCH make build LDFLAGS="${LDFLAGS}"
+COPY backend/go.mod backend/go.sum ./backend/
+RUN cd backend && go mod download
+
+COPY backend/ ./backend/
+
+RUN cd backend && GOOS=$TARGETOS GOARCH=$TARGETARCH make build LDFLAGS="${LDFLAGS}"
 
 FROM ${RUNTIME_IMAGE}
 
 WORKDIR /app
 
-COPY --from=build /workspace/bin/server /app/server
+COPY --from=build /workspace/backend/bin/server /app/server
 
 RUN chown -R 1000:1000 /app
 USER 1000

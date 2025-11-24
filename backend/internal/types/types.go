@@ -5,6 +5,7 @@ import (
 	"time"
 
 	monitorv1 "github.com/emil-j-olsson/ubiquiti/backend/proto/monitor/v1"
+	devicev1 "github.com/emil-j-olsson/ubiquiti/device/proto/device/v1"
 )
 
 var (
@@ -40,6 +41,9 @@ type Device struct {
 	ID                 *string    `db:"id"`
 	Identifier         *string    `db:"device_id"`
 	Alias              *string    `db:"alias"`
+	Host               *string    `db:"host"`
+	Port               *int64     `db:"port"`
+	GatewayPort        *int64     `db:"port_gateway"`
 	Architecture       *string    `db:"architecture"`
 	OS                 *string    `db:"os"`
 	SupportedProtocols *[]string  `db:"supported_protocols"`
@@ -51,6 +55,9 @@ type Diagnostics struct {
 	ID                 *string    `db:"id"`
 	Identifier         *string    `db:"device_id"`
 	Alias              *string    `db:"alias"`
+	Host               *string    `db:"host"`
+	Port               *int64     `db:"port"`
+	GatewayPort        *int64     `db:"port_gateway"`
 	Architecture       *string    `db:"architecture"`
 	OS                 *string    `db:"os"`
 	SupportedProtocols *[]string  `db:"supported_protocols"`
@@ -64,6 +71,38 @@ type Diagnostics struct {
 	LastUpdated        *time.Time `db:"last_updated"`
 	Created            *time.Time `db:"created_at"`
 	Updated            *time.Time `db:"updated_at"`
+}
+
+type DeviceHealthStatus struct {
+	Identifier         string
+	SupportedProtocols []Protocol
+	Architecture       string
+	OS                 string
+	Updated            time.Time
+}
+
+type DeviceDiagnostics struct {
+	Identifier     string
+	DeviceVersions DeviceVersions
+	CPU            float64
+	Memory         float64
+	DeviceStatus   DeviceStatus
+	Checksum       string
+	Timestamp      time.Time
+}
+
+type DeviceVersions struct {
+	Hardware string
+	Software string
+	Firmware string
+}
+
+type DeviceRegistration struct {
+	Protocol    Protocol
+	Alias       string
+	Host        string
+	Port        int64
+	GatewayPort int64
 }
 
 //go:generate go-enum
@@ -154,11 +193,29 @@ func (p *Protocol) Proto() monitorv1.Protocol {
 	}
 }
 
+func (p *Protocol) IsGrpc() bool {
+	return *p == ProtocolGrpc || *p == ProtocolGrpcStream
+}
+
+func (p *Protocol) IsHttp() bool {
+	return *p == ProtocolHttp || *p == ProtocolHttpStream
+}
+
 func ProtocolFromStrings(values []string) []monitorv1.Protocol {
 	result := make([]monitorv1.Protocol, 0, len(values))
 	for _, value := range values {
 		if p, err := ParseProtocol(value); err == nil {
 			result = append(result, p.Proto())
+		}
+	}
+	return result
+}
+
+func ProtocolFromDevice(values []devicev1.Protocol) []Protocol {
+	result := make([]Protocol, 0, len(values))
+	for _, value := range values {
+		if p, err := ParseProtocol(value.String()); err == nil {
+			result = append(result, p)
 		}
 	}
 	return result

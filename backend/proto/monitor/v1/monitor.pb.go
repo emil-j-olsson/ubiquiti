@@ -143,11 +143,14 @@ type Device struct {
 	Id                 string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	DeviceId           string                 `protobuf:"bytes,2,opt,name=device_id,proto3" json:"device_id,omitempty"`
 	Alias              string                 `protobuf:"bytes,3,opt,name=alias,proto3" json:"alias,omitempty"`
-	Architecture       string                 `protobuf:"bytes,4,opt,name=architecture,proto3" json:"architecture,omitempty"`
-	Os                 string                 `protobuf:"bytes,5,opt,name=os,proto3" json:"os,omitempty"`
-	SupportedProtocols []Protocol             `protobuf:"varint,6,rep,packed,name=supported_protocols,proto3,enum=monitor.v1.Protocol" json:"supported_protocols,omitempty"`
-	CreatedAt          *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,proto3" json:"created_at,omitempty"`
-	UpdatedAt          *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=updated_at,proto3" json:"updated_at,omitempty"`
+	Host               string                 `protobuf:"bytes,4,opt,name=host,proto3" json:"host,omitempty"`
+	Port               int64                  `protobuf:"varint,5,opt,name=port,proto3" json:"port,omitempty"`
+	PortGateway        int64                  `protobuf:"varint,6,opt,name=port_gateway,proto3" json:"port_gateway,omitempty"`
+	Architecture       string                 `protobuf:"bytes,7,opt,name=architecture,proto3" json:"architecture,omitempty"`
+	Os                 string                 `protobuf:"bytes,8,opt,name=os,proto3" json:"os,omitempty"`
+	SupportedProtocols []Protocol             `protobuf:"varint,9,rep,packed,name=supported_protocols,proto3,enum=monitor.v1.Protocol" json:"supported_protocols,omitempty"`
+	CreatedAt          *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=created_at,proto3" json:"created_at,omitempty"`
+	UpdatedAt          *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=updated_at,proto3" json:"updated_at,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -201,6 +204,27 @@ func (x *Device) GetAlias() string {
 		return x.Alias
 	}
 	return ""
+}
+
+func (x *Device) GetHost() string {
+	if x != nil {
+		return x.Host
+	}
+	return ""
+}
+
+func (x *Device) GetPort() int64 {
+	if x != nil {
+		return x.Port
+	}
+	return 0
+}
+
+func (x *Device) GetPortGateway() int64 {
+	if x != nil {
+		return x.PortGateway
+	}
+	return 0
 }
 
 func (x *Device) GetArchitecture() string {
@@ -333,6 +357,11 @@ func (x *Diagnostics) GetChecksum() string {
 type RegisterDeviceRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	DeviceId      string                 `protobuf:"bytes,1,opt,name=device_id,proto3" json:"device_id,omitempty"`
+	Alias         string                 `protobuf:"bytes,2,opt,name=alias,proto3" json:"alias,omitempty"`
+	Host          string                 `protobuf:"bytes,3,opt,name=host,proto3" json:"host,omitempty"`
+	Port          int64                  `protobuf:"varint,4,opt,name=port,proto3" json:"port,omitempty"`
+	PortGateway   int64                  `protobuf:"varint,5,opt,name=port_gateway,proto3" json:"port_gateway,omitempty"`
+	Protocol      Protocol               `protobuf:"varint,6,opt,name=protocol,proto3,enum=monitor.v1.Protocol" json:"protocol,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -372,6 +401,41 @@ func (x *RegisterDeviceRequest) GetDeviceId() string {
 		return x.DeviceId
 	}
 	return ""
+}
+
+func (x *RegisterDeviceRequest) GetAlias() string {
+	if x != nil {
+		return x.Alias
+	}
+	return ""
+}
+
+func (x *RegisterDeviceRequest) GetHost() string {
+	if x != nil {
+		return x.Host
+	}
+	return ""
+}
+
+func (x *RegisterDeviceRequest) GetPort() int64 {
+	if x != nil {
+		return x.Port
+	}
+	return 0
+}
+
+func (x *RegisterDeviceRequest) GetPortGateway() int64 {
+	if x != nil {
+		return x.PortGateway
+	}
+	return 0
+}
+
+func (x *RegisterDeviceRequest) GetProtocol() Protocol {
+	if x != nil {
+		return x.Protocol
+	}
+	return Protocol_PROTOCOL_UNSPECIFIED
 }
 
 type RegisterDeviceResponse struct {
@@ -623,19 +687,23 @@ var File_proto_monitor_v1_monitor_proto protoreflect.FileDescriptor
 const file_proto_monitor_v1_monitor_proto_rawDesc = "" +
 	"\n" +
 	"\x1eproto/monitor/v1/monitor.proto\x12\n" +
-	"monitor.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bgoogle/protobuf/empty.proto\"\xc0\x02\n" +
+	"monitor.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bgoogle/protobuf/empty.proto\"\x8c\x03\n" +
 	"\x06Device\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1c\n" +
 	"\tdevice_id\x18\x02 \x01(\tR\tdevice_id\x12\x14\n" +
-	"\x05alias\x18\x03 \x01(\tR\x05alias\x12\"\n" +
-	"\farchitecture\x18\x04 \x01(\tR\farchitecture\x12\x0e\n" +
-	"\x02os\x18\x05 \x01(\tR\x02os\x12F\n" +
-	"\x13supported_protocols\x18\x06 \x03(\x0e2\x14.monitor.v1.ProtocolR\x13supported_protocols\x12:\n" +
+	"\x05alias\x18\x03 \x01(\tR\x05alias\x12\x12\n" +
+	"\x04host\x18\x04 \x01(\tR\x04host\x12\x12\n" +
+	"\x04port\x18\x05 \x01(\x03R\x04port\x12\"\n" +
+	"\fport_gateway\x18\x06 \x01(\x03R\fport_gateway\x12\"\n" +
+	"\farchitecture\x18\a \x01(\tR\farchitecture\x12\x0e\n" +
+	"\x02os\x18\b \x01(\tR\x02os\x12F\n" +
+	"\x13supported_protocols\x18\t \x03(\x0e2\x14.monitor.v1.ProtocolR\x13supported_protocols\x12:\n" +
 	"\n" +
-	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"created_at\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\n" +
 	"created_at\x12:\n" +
 	"\n" +
-	"updated_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"updated_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\n" +
 	"updated_at\"\xaf\x02\n" +
 	"\vDiagnostics\x12*\n" +
 	"\x10hardware_version\x18\x01 \x01(\tR\x10hardware_version\x12*\n" +
@@ -644,9 +712,14 @@ const file_proto_monitor_v1_monitor_proto_rawDesc = "" +
 	"\tcpu_usage\x18\x04 \x01(\x01R\tcpu_usage\x12\"\n" +
 	"\fmemory_usage\x18\x05 \x01(\x01R\fmemory_usage\x12>\n" +
 	"\rdevice_status\x18\x06 \x01(\x0e2\x18.monitor.v1.DeviceStatusR\rdevice_status\x12\x1a\n" +
-	"\bchecksum\x18\a \x01(\tR\bchecksum\"5\n" +
+	"\bchecksum\x18\a \x01(\tR\bchecksum\"\xc9\x01\n" +
 	"\x15RegisterDeviceRequest\x12\x1c\n" +
-	"\tdevice_id\x18\x01 \x01(\tR\tdevice_id\"D\n" +
+	"\tdevice_id\x18\x01 \x01(\tR\tdevice_id\x12\x14\n" +
+	"\x05alias\x18\x02 \x01(\tR\x05alias\x12\x12\n" +
+	"\x04host\x18\x03 \x01(\tR\x04host\x12\x12\n" +
+	"\x04port\x18\x04 \x01(\x03R\x04port\x12\"\n" +
+	"\fport_gateway\x18\x05 \x01(\x03R\fport_gateway\x120\n" +
+	"\bprotocol\x18\x06 \x01(\x0e2\x14.monitor.v1.ProtocolR\bprotocol\"D\n" +
 	"\x16RegisterDeviceResponse\x12*\n" +
 	"\x06device\x18\x01 \x01(\v2\x12.monitor.v1.DeviceR\x06device\"C\n" +
 	"\x13ListDevicesResponse\x12,\n" +
@@ -717,29 +790,30 @@ var file_proto_monitor_v1_monitor_proto_depIdxs = []int32{
 	10, // 1: monitor.v1.Device.created_at:type_name -> google.protobuf.Timestamp
 	10, // 2: monitor.v1.Device.updated_at:type_name -> google.protobuf.Timestamp
 	1,  // 3: monitor.v1.Diagnostics.device_status:type_name -> monitor.v1.DeviceStatus
-	2,  // 4: monitor.v1.RegisterDeviceResponse.device:type_name -> monitor.v1.Device
-	2,  // 5: monitor.v1.ListDevicesResponse.devices:type_name -> monitor.v1.Device
-	2,  // 6: monitor.v1.DiagnosticsResponse.device:type_name -> monitor.v1.Device
-	3,  // 7: monitor.v1.DiagnosticsResponse.diagnostics:type_name -> monitor.v1.Diagnostics
-	10, // 8: monitor.v1.DiagnosticsResponse.updated_at:type_name -> google.protobuf.Timestamp
-	1,  // 9: monitor.v1.UpdateSimulatedDeviceRequest.device_status:type_name -> monitor.v1.DeviceStatus
-	11, // 10: monitor.v1.Monitor.GetHealth:input_type -> google.protobuf.Empty
-	4,  // 11: monitor.v1.Monitor.RegisterDevice:input_type -> monitor.v1.RegisterDeviceRequest
-	11, // 12: monitor.v1.Monitor.ListDevices:input_type -> google.protobuf.Empty
-	7,  // 13: monitor.v1.Monitor.GetDiagnostics:input_type -> monitor.v1.DiagnosticsRequest
-	7,  // 14: monitor.v1.Monitor.StreamDiagnostics:input_type -> monitor.v1.DiagnosticsRequest
-	9,  // 15: monitor.v1.Monitor.UpdateSimulatedDevice:input_type -> monitor.v1.UpdateSimulatedDeviceRequest
-	11, // 16: monitor.v1.Monitor.GetHealth:output_type -> google.protobuf.Empty
-	5,  // 17: monitor.v1.Monitor.RegisterDevice:output_type -> monitor.v1.RegisterDeviceResponse
-	6,  // 18: monitor.v1.Monitor.ListDevices:output_type -> monitor.v1.ListDevicesResponse
-	8,  // 19: monitor.v1.Monitor.GetDiagnostics:output_type -> monitor.v1.DiagnosticsResponse
-	8,  // 20: monitor.v1.Monitor.StreamDiagnostics:output_type -> monitor.v1.DiagnosticsResponse
-	11, // 21: monitor.v1.Monitor.UpdateSimulatedDevice:output_type -> google.protobuf.Empty
-	16, // [16:22] is the sub-list for method output_type
-	10, // [10:16] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	0,  // 4: monitor.v1.RegisterDeviceRequest.protocol:type_name -> monitor.v1.Protocol
+	2,  // 5: monitor.v1.RegisterDeviceResponse.device:type_name -> monitor.v1.Device
+	2,  // 6: monitor.v1.ListDevicesResponse.devices:type_name -> monitor.v1.Device
+	2,  // 7: monitor.v1.DiagnosticsResponse.device:type_name -> monitor.v1.Device
+	3,  // 8: monitor.v1.DiagnosticsResponse.diagnostics:type_name -> monitor.v1.Diagnostics
+	10, // 9: monitor.v1.DiagnosticsResponse.updated_at:type_name -> google.protobuf.Timestamp
+	1,  // 10: monitor.v1.UpdateSimulatedDeviceRequest.device_status:type_name -> monitor.v1.DeviceStatus
+	11, // 11: monitor.v1.Monitor.GetHealth:input_type -> google.protobuf.Empty
+	4,  // 12: monitor.v1.Monitor.RegisterDevice:input_type -> monitor.v1.RegisterDeviceRequest
+	11, // 13: monitor.v1.Monitor.ListDevices:input_type -> google.protobuf.Empty
+	7,  // 14: monitor.v1.Monitor.GetDiagnostics:input_type -> monitor.v1.DiagnosticsRequest
+	7,  // 15: monitor.v1.Monitor.StreamDiagnostics:input_type -> monitor.v1.DiagnosticsRequest
+	9,  // 16: monitor.v1.Monitor.UpdateSimulatedDevice:input_type -> monitor.v1.UpdateSimulatedDeviceRequest
+	11, // 17: monitor.v1.Monitor.GetHealth:output_type -> google.protobuf.Empty
+	5,  // 18: monitor.v1.Monitor.RegisterDevice:output_type -> monitor.v1.RegisterDeviceResponse
+	6,  // 19: monitor.v1.Monitor.ListDevices:output_type -> monitor.v1.ListDevicesResponse
+	8,  // 20: monitor.v1.Monitor.GetDiagnostics:output_type -> monitor.v1.DiagnosticsResponse
+	8,  // 21: monitor.v1.Monitor.StreamDiagnostics:output_type -> monitor.v1.DiagnosticsResponse
+	11, // 22: monitor.v1.Monitor.UpdateSimulatedDevice:output_type -> google.protobuf.Empty
+	17, // [17:23] is the sub-list for method output_type
+	11, // [11:17] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_proto_monitor_v1_monitor_proto_init() }

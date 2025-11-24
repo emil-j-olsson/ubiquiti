@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/emil-j-olsson/ubiquiti/backend/internal/database/exceptions"
+	"github.com/emil-j-olsson/ubiquiti/backend/internal/device"
 	"github.com/emil-j-olsson/ubiquiti/backend/internal/types"
 	monitorv1 "github.com/emil-j-olsson/ubiquiti/backend/proto/monitor/v1"
 	"go.uber.org/zap"
@@ -26,6 +27,7 @@ var (
 )
 
 type Provider interface {
+	RegisterDevice(ctx context.Context, reg types.DeviceRegistration) (types.Device, error)
 	ListDevices(ctx context.Context) ([]types.Device, error)
 	GetDiagnostics(ctx context.Context, device string) (types.Diagnostics, error)
 	StreamDiagnostics(ctx context.Context, device string) <-chan types.Diagnostics
@@ -50,6 +52,32 @@ func (s *Server) GetHealth(ctx context.Context, _ *emptypb.Empty) (*emptypb.Empt
 	return &emptypb.Empty{}, nil
 }
 
+func (s *Server) RegisterDevice(
+	ctx context.Context,
+	req *monitorv1.RegisterDeviceRequest,
+) (*monitorv1.RegisterDeviceResponse, error) {
+	ctx, cancel := context.WithTimeout(ctx, DefaultContextTimeout)
+	defer cancel()
+	if err := req.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	protocol := types.Protocol(req.GetProtocol().String())
+	dev, err := s.provider.RegisterDevice(ctx, types.DeviceRegistration{
+		Protocol:    protocol,
+		Alias:       req.GetAlias(),
+		Host:        req.GetHost(),
+		Port:        req.GetPort(),
+		GatewayPort: req.GetPortGateway(),
+	})
+	if err != nil {
+		if errors.Is(err, device.ErrorNotFound) {
+			return nil, status.Error(codes.NotFound, err.Error())
+		}
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return &monitorv1.RegisterDeviceResponse{Device: s.device(dev)}, nil
+}
+
 func (s *Server) ListDevices(ctx context.Context, _ *emptypb.Empty) (*monitorv1.ListDevicesResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, DefaultContextTimeout)
 	defer cancel()
@@ -59,16 +87,7 @@ func (s *Server) ListDevices(ctx context.Context, _ *emptypb.Empty) (*monitorv1.
 	}
 	devices := make([]*monitorv1.Device, len(result))
 	for i, device := range result {
-		devices[i] = &monitorv1.Device{
-			Id:                 deref(device.ID),
-			DeviceId:           deref(device.Identifier),
-			Alias:              deref(device.Alias),
-			Architecture:       deref(device.Architecture),
-			Os:                 deref(device.OS),
-			SupportedProtocols: types.ProtocolFromStrings(deref(device.SupportedProtocols)),
-			CreatedAt:          timestamp(device.Created),
-			UpdatedAt:          timestamp(device.Updated),
-		}
+		devices[i] = s.device(device)
 	}
 	return &monitorv1.ListDevicesResponse{Devices: devices}, nil
 }
@@ -107,6 +126,22 @@ func (s *Server) StreamDiagnostics(
 	return nil
 }
 
+func (s *Server) device(device types.Device) *monitorv1.Device {
+	return &monitorv1.Device{
+		Id:                 deref(device.ID),
+		DeviceId:           deref(device.Identifier),
+		Alias:              deref(device.Alias),
+		Host:               deref(device.Host),
+		Port:               deref(device.Port),
+		PortGateway:        deref(device.GatewayPort),
+		Architecture:       deref(device.Architecture),
+		Os:                 deref(device.OS),
+		SupportedProtocols: types.ProtocolFromStrings(deref(device.SupportedProtocols)),
+		CreatedAt:          timestamp(device.Created),
+		UpdatedAt:          timestamp(device.Updated),
+	}
+}
+
 func (s *Server) diagnostics(diag types.Diagnostics) *monitorv1.DiagnosticsResponse {
 	status := types.DeviceStatusFromString(deref(diag.DeviceStatus))
 	return &monitorv1.DiagnosticsResponse{
@@ -114,6 +149,9 @@ func (s *Server) diagnostics(diag types.Diagnostics) *monitorv1.DiagnosticsRespo
 			Id:                 deref(diag.ID),
 			DeviceId:           deref(diag.Identifier),
 			Alias:              deref(diag.Alias),
+			Host:               deref(diag.Host),
+			Port:               deref(diag.Port),
+			PortGateway:        deref(diag.GatewayPort),
 			Architecture:       deref(diag.Architecture),
 			Os:                 deref(diag.OS),
 			SupportedProtocols: types.ProtocolFromStrings(deref(diag.SupportedProtocols)),

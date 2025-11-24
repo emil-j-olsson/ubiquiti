@@ -21,6 +21,9 @@ create table if not exists devices (
     id uuid primary key default gen_random_uuid(),
     device_id varchar(255) not null unique,
     alias varchar(255),
+    host varchar(255) not null,
+    port integer,
+    port_gateway integer,
     architecture varchar(50) not null,
     os varchar(50) not null,
     supported_protocols device_protocol[] not null,
@@ -57,6 +60,9 @@ select distinct on (d.device_id)
     d.id,
     d.device_id,
     d.alias,
+    d.host,
+    d.port,
+    d.port_gateway,
     d.architecture,
     d.os,
     d.supported_protocols,
@@ -89,17 +95,14 @@ create trigger trigger_update_device_timestamp
     for each row
     execute function update_device_updated_at();
 
--- Dummy data (to be removed later)
-insert into devices (device_id, alias, architecture, os, supported_protocols) values
-    ('device-001', 'Gateway Router', 'arm64', 'Linux', array['PROTOCOL_HTTP'::device_protocol, 'PROTOCOL_GRPC'::device_protocol]),
-    ('device-002', 'Access Point', 'amd64', 'Linux', array['PROTOCOL_HTTP'::device_protocol, 'PROTOCOL_GRPC_STREAM'::device_protocol]),
-    ('device-003', 'Switch', 'arm', 'Linux', array['PROTOCOL_HTTP_STREAM'::device_protocol]);
+insert into devices (device_id, alias, host, port, port_gateway, architecture, os, supported_protocols) values
+    ('ubiquiti-device-router-3c2d', 'Dream Machine Pro Max', 'ubiquiti-device-router', 8080, 8081, 'arm64', 'linux', array['PROTOCOL_GRPC'::device_protocol]),
+    ('ubiquiti-device-switch-b87f', 'Pro Max 24 PoE', 'ubiquiti-device-switch', 8080, 8081, 'amd64', 'linux', array['PROTOCOL_GRPC_STREAM'::device_protocol]);
 
+-- Dummy data (to be removed later)
 insert into device_diagnostics (device_id, cpu_usage, memory_usage, device_status, hardware_version, software_version, firmware_version, checksum, timestamp) values
-    ((select id from devices where device_id = 'device-001'), 45.2, 62.8, 'DEVICE_STATUS_HEALTHY', 'HW:1.0.0', 'SW:2.1.3', 'FW:3.0.1', 'abc123def456', now() - interval '1 hour'),
-    ((select id from devices where device_id = 'device-001'), 52.3, 68.1, 'DEVICE_STATUS_HEALTHY', 'HW:1.0.0', 'SW:2.1.3', 'FW:3.0.1', 'abc123def457', now() - interval '30 minutes'),
-    ((select id from devices where device_id = 'device-001'), 38.7, 59.2, 'DEVICE_STATUS_HEALTHY', 'HW:1.0.0', 'SW:2.1.3', 'FW:3.0.1', 'abc123def458', now()),
-    ((select id from devices where device_id = 'device-002'), 78.9, 85.3, 'DEVICE_STATUS_DEGRADED', 'HW:1.2.0', 'SW:1.8.5', 'FW:2.5.0', 'def789ghi012', now() - interval '2 hours'),
-    ((select id from devices where device_id = 'device-002'), 82.1, 87.6, 'DEVICE_STATUS_ERROR', 'HW:1.2.0', 'SW:1.8.5', 'FW:2.5.0', 'def789ghi013', now()),
-    ((select id from devices where device_id = 'device-003'), 15.3, 42.7, 'DEVICE_STATUS_BOOTING', 'HW:2.0.0', 'SW:3.0.0', 'FW:4.1.2', 'ghi345jkl678', now() - interval '5 minutes'),
-    ((select id from devices where device_id = 'device-003'), 22.1, 48.3, 'DEVICE_STATUS_HEALTHY', 'HW:2.0.0', 'SW:3.0.0', 'FW:4.1.2', 'ghi345jkl679', now());
+    ((select id from devices where device_id = 'ubiquiti-device-router-3c2d'), 45.2, 62.8, 'DEVICE_STATUS_HEALTHY', 'HW:4.4.6', 'SW:alpine:3.22.2:arm64', 'FW:4.3.20.11298', 'abc123def456', now() - interval '1 hour'),
+    ((select id from devices where device_id = 'ubiquiti-device-router-3c2d'), 52.3, 68.1, 'DEVICE_STATUS_HEALTHY', 'HW:4.4.6', 'SW:alpine:3.22.2:arm64', 'FW:4.3.20.11298', 'abc123def457', now() - interval '30 minutes'),
+    ((select id from devices where device_id = 'ubiquiti-device-router-3c2d'), 38.7, 59.2, 'DEVICE_STATUS_HEALTHY', 'HW:4.4.6', 'SW:alpine:3.22.2:arm64', 'FW:4.3.20.11298', 'abc123def458', now()),
+    ((select id from devices where device_id = 'ubiquiti-device-switch-b87f'), 78.9, 85.3, 'DEVICE_STATUS_DEGRADED', 'HW:2.9.3', 'SW:ubuntu:22.04:amd64', 'FW:5.11.0.11599', 'def789ghi012', now() - interval '2 hours'),
+    ((select id from devices where device_id = 'ubiquiti-device-switch-b87f'), 82.1, 87.6, 'DEVICE_STATUS_ERROR', 'HW:2.9.3', 'SW:ubuntu:22.04:amd64', 'FW:5.11.0.11599', 'def789ghi013', now());

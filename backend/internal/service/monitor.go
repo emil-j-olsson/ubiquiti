@@ -4,48 +4,79 @@ import (
 	"context"
 	"time"
 
+	"github.com/emil-j-olsson/ubiquiti/backend/internal/device"
 	"github.com/emil-j-olsson/ubiquiti/backend/internal/types"
 	"go.uber.org/zap"
 )
 
-// Business logic
-// Here we spin up all layers needed for the monitor service & respond to api calls
-
-type StateProvider interface {
+type PersistenceProvider interface {
+	RegisterDevice(
+		ctx context.Context,
+		status types.DeviceHealthStatus,
+		reg types.DeviceRegistration,
+	) (types.Device, error)
 	ListDevices(ctx context.Context) ([]types.Device, error)
 	GetDiagnostics(ctx context.Context, device string) (types.Diagnostics, error)
 }
 
 type DeviceProvider interface {
+	CreateClient(config device.Config) (device.Client, error)
 }
 
 type MonitorService struct {
-	state  StateProvider
-	device DeviceProvider
-	config types.Config
-	logger *zap.Logger
+	persistence PersistenceProvider
+	device      DeviceProvider
+	config      types.Config
+	logger      *zap.Logger
 }
 
 func NewMonitorService(
-	state StateProvider,
+	persistence PersistenceProvider,
 	device DeviceProvider,
 	config types.Config,
 	logger *zap.Logger,
 ) *MonitorService {
 	return &MonitorService{
-		state:  state,
-		device: device,
-		config: config,
-		logger: logger,
+		persistence: persistence,
+		device:      device,
+		config:      config,
+		logger:      logger,
 	}
 }
 
+func (s *MonitorService) RegisterDevice(
+	ctx context.Context,
+	reg types.DeviceRegistration,
+) (types.Device, error) {
+	port := reg.Port
+	if reg.Protocol.IsHttp() {
+		port = reg.GatewayPort
+	}
+	client, err := s.device.CreateClient(device.Config{
+		Protocol: reg.Protocol,
+		Host:     reg.Host,
+		Port:     port,
+	})
+	if err != nil {
+		return types.Device{}, err
+	}
+	health, err := client.GetHealth(ctx)
+	if err != nil {
+		return types.Device{}, err
+	}
+	device, err := s.persistence.RegisterDevice(ctx, *health, reg)
+	if err != nil {
+		return types.Device{}, err
+	}
+	return device, nil
+}
+
 func (s *MonitorService) ListDevices(ctx context.Context) ([]types.Device, error) {
-	return s.state.ListDevices(ctx)
+	return s.persistence.ListDevices(ctx)
 }
 
 func (s *MonitorService) GetDiagnostics(ctx context.Context, device string) (types.Diagnostics, error) {
-	return s.state.GetDiagnostics(ctx, device)
+	return s.persistence.GetDiagnostics(ctx, device)
 }
 
 func (s *MonitorService) StreamDiagnostics(ctx context.Context, device string) <-chan types.Diagnostics {
@@ -60,7 +91,7 @@ func (s *MonitorService) StreamDiagnostics(ctx context.Context, device string) <
 			case <-ctx.Done():
 				return
 			case <-ticker.C:
-				diagnostics, err := s.state.GetDiagnostics(ctx, device)
+				diagnostics, err := s.persistence.GetDiagnostics(ctx, device)
 				if err != nil {
 					s.logger.Error(
 						"failed to get diagnostics for streaming",
