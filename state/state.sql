@@ -95,6 +95,28 @@ create trigger trigger_update_device_timestamp
     for each row
     execute function update_device_updated_at();
 
+-- Function to notify on device changes
+create or replace function notify_device_change()
+returns trigger AS $$
+declare
+    payload JSON;
+begin
+    payload = json_build_object(
+        'device_id', new.device_id,
+        'operation', TG_OP
+    );
+    perform pg_notify('device_changes', payload::text);
+    return new;
+end;
+$$ language plpgsql;
+
+-- Trigger to notify on device insertions and deletions
+create trigger trigger_notify_device_change
+    after insert or delete on devices
+    for each row
+    execute function notify_device_change();
+
+-- Default device state (demo)
 insert into devices (device_id, alias, host, port, port_gateway, architecture, os, supported_protocols) values
     ('ubiquiti-device-router-3c2d', 'Dream Machine Pro Max', 'ubiquiti-device-router', 8080, 8081, 'arm64', 'linux', array['PROTOCOL_GRPC'::device_protocol]),
     ('ubiquiti-device-switch-b87f', 'Pro Max 24 PoE', 'ubiquiti-device-switch', 8080, 8081, 'amd64', 'linux', array['PROTOCOL_GRPC_STREAM'::device_protocol]);

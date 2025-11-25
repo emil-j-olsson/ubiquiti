@@ -54,7 +54,13 @@ func (d *ClientGrpc) GetHealth(ctx context.Context) (*types.DeviceHealthStatus, 
 	}, nil
 }
 
-// GetDiagnostics
+func (d *ClientGrpc) GetDiagnostics(ctx context.Context) (*types.DeviceDiagnostics, error) {
+	res, err := d.client.GetDiagnostics(ctx, &devicev1.DiagnosticsRequest{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to perform diagnostics request (grpc): %w", err)
+	}
+	return d.diagnostics(res), nil
+}
 
 // StreamDiagnostics
 
@@ -71,4 +77,20 @@ func (d *ClientGrpc) Close() error {
 		return d.conn.Close()
 	}
 	return nil
+}
+
+func (d *ClientGrpc) diagnostics(diag *devicev1.DiagnosticsResponse) *types.DeviceDiagnostics {
+	return &types.DeviceDiagnostics{
+		Identifier: diag.DeviceId,
+		DeviceVersions: types.DeviceVersions{
+			Hardware: diag.HardwareVersion,
+			Software: diag.SoftwareVersion,
+			Firmware: diag.FirmwareVersion,
+		},
+		CPU:          diag.CpuUsage,
+		Memory:       diag.MemoryUsage,
+		DeviceStatus: types.DeviceStatusFromString(diag.DeviceStatus.String()),
+		Checksum:     diag.Checksum,
+		Timestamp:    diag.Timestamp.AsTime(),
+	}
 }

@@ -33,8 +33,9 @@ type Persistence struct {
 }
 
 type Postgres struct {
-	ConnectionString string `envconfig:"CONNECTION_STRING"`
-	MaxPoolSize      int32  `envconfig:"MAX_POOL_SIZE"     default:"10"`
+	ConnectionString    string `envconfig:"CONNECTION_STRING"`
+	MaxPoolSize         int32  `envconfig:"MAX_POOL_SIZE"        default:"25"`
+	NotificationChannel string `envconfig:"NOTIFICATION_CHANNEL" default:"device_changes"`
 }
 
 type Device struct {
@@ -103,6 +104,11 @@ type DeviceRegistration struct {
 	Host        string
 	Port        int64
 	GatewayPort int64
+}
+
+type Event struct {
+	Channel string
+	Payload string
 }
 
 //go:generate go-enum

@@ -34,6 +34,7 @@ func NewClientHttp(config Config) *ClientHttp {
 	}
 }
 
+// TODO: make generic request logic and reuse code...
 func (d *ClientHttp) GetHealth(ctx context.Context) (*types.DeviceHealthStatus, error) {
 	endpoint, err := url.JoinPath(d.url, "/v1/health")
 	if err != nil {
@@ -48,7 +49,7 @@ func (d *ClientHttp) GetHealth(ctx context.Context) (*types.DeviceHealthStatus, 
 	if err != nil {
 		return nil, fmt.Errorf("failed to perform health request (http): %w", err)
 	}
-	response.Body.Close() // nolint:errcheck
+	defer response.Body.Close() // nolint:errcheck
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body (http): %w", err)
@@ -72,7 +73,37 @@ func (d *ClientHttp) GetHealth(ctx context.Context) (*types.DeviceHealthStatus, 
 	}, nil
 }
 
-// GetDiagnostics
+func (d *ClientHttp) GetDiagnostics(ctx context.Context) (*types.DeviceDiagnostics, error) {
+	endpoint, err := url.JoinPath(d.url, "/v1/diagnostics")
+	if err != nil {
+		return nil, fmt.Errorf("failed to join url path (http): %w", err)
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create diagnostics request (http): %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	response, err := d.client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to perform diagnostics request (http): %w", err)
+	}
+	defer response.Body.Close() // nolint:errcheck
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body (http): %w", err)
+	}
+	if response.StatusCode != http.StatusOK {
+		if response.StatusCode == http.StatusNotFound {
+			return nil, fmt.Errorf("%w: device is not available (http): %s", ErrorNotFound, endpoint)
+		}
+		return nil, fmt.Errorf("failed request with status %d (http): %s", response.StatusCode, string(body))
+	}
+	var res devicev1.DiagnosticsResponse
+	if err := protojson.Unmarshal(body, &res); err != nil {
+		return nil, fmt.Errorf("failed to decode diagnostics response (http): %w", err)
+	}
+	return d.diagnostics(&res), nil
+}
 
 // StreamDiagnostics
 
@@ -106,4 +137,20 @@ func (d *ClientHttp) UpdateDevice(ctx context.Context, status types.DeviceStatus
 func (d *ClientHttp) Close() error {
 	d.client.CloseIdleConnections()
 	return nil
+}
+
+func (d *ClientHttp) diagnostics(diag *devicev1.DiagnosticsResponse) *types.DeviceDiagnostics {
+	return &types.DeviceDiagnostics{
+		Identifier: diag.DeviceId,
+		DeviceVersions: types.DeviceVersions{
+			Hardware: diag.HardwareVersion,
+			Software: diag.SoftwareVersion,
+			Firmware: diag.FirmwareVersion,
+		},
+		CPU:          diag.CpuUsage,
+		Memory:       diag.MemoryUsage,
+		DeviceStatus: types.DeviceStatusFromString(diag.DeviceStatus.String()),
+		Checksum:     diag.Checksum,
+		Timestamp:    diag.Timestamp.AsTime(),
+	}
 }

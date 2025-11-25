@@ -78,8 +78,8 @@ func (r *PersistenceRepository) RegisterDevice(
 	return result, nil
 }
 
-func (r *PersistenceRepository) GetDevice(ctx context.Context, device string) (types.Device, error) {
-	rows, err := r.pool.Query(ctx, `select * from devices where device_id = $1`, device)
+func (r *PersistenceRepository) GetDevice(ctx context.Context, deviceID string) (types.Device, error) {
+	rows, err := r.pool.Query(ctx, `select * from devices where device_id = $1`, deviceID)
 	if err != nil {
 		return types.Device{}, fmt.Errorf(
 			"%w: failed to query device (postgres): %w",
@@ -93,7 +93,7 @@ func (r *PersistenceRepository) GetDevice(ctx context.Context, device string) (t
 			return types.Device{}, fmt.Errorf(
 				"%w: failed to retrieve device '%s': %w",
 				exceptions.ErrorNotFound,
-				device,
+				deviceID,
 				err,
 			)
 		}
@@ -124,9 +124,9 @@ func (r *PersistenceRepository) ListDevices(ctx context.Context) ([]types.Device
 
 func (r *PersistenceRepository) GetDiagnostics(
 	ctx context.Context,
-	device string,
+	deviceID string,
 ) (types.Diagnostics, error) {
-	rows, err := r.pool.Query(ctx, `select * from device_diagnostics_snapshot where device_id = $1`, device)
+	rows, err := r.pool.Query(ctx, `select * from device_diagnostics_snapshot where device_id = $1`, deviceID)
 	if err != nil {
 		return types.Diagnostics{}, fmt.Errorf(
 			"%w: failed to query diagnostics (postgres): %w",
@@ -140,7 +140,7 @@ func (r *PersistenceRepository) GetDiagnostics(
 			return types.Diagnostics{}, fmt.Errorf(
 				"%w: failed to retrieve diagnostic data for device '%s': %w",
 				exceptions.ErrorNotFound,
-				device,
+				deviceID,
 				err,
 			)
 		}

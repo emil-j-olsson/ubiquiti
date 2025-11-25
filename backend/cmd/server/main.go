@@ -92,6 +92,7 @@ func run() error {
 		return err
 	}
 	persistence := postgres.NewPersistenceRepository(pool, logger)
+	notifier := postgres.NewNotifier(pool, config.Persistence.Postgres.NotificationChannel, logger)
 
 	// External Clients
 	factory := device.NewClientFactory()
@@ -100,8 +101,27 @@ func run() error {
 	monitorService := service.NewMonitorService(persistence, factory, config, logger)
 	monitorServer := server.NewMonitorServer(monitorService, logger)
 
-	// Server Lifecycle
+	// Worker Lifecycle
 	g, gctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		return notifier.Listen(gctx)
+	})
+	// g.Go(func() error {
+	// 	subscriber := notifier.Subscribe(gctx)
+	// 	for {
+	// 		select {
+	// 		case <-gctx.Done():
+	// 			return gctx.Err()
+	// 		case event, ok := <-subscriber:
+	// 			if !ok {
+	// 				return nil
+	// 			}
+	// 			logger.Info("received notification", zap.String("channel", event.Channel), zap.String("payload", event.Payload))
+	// 		}
+	// 	}
+	// })
+
+	// Server Lifecycle
 	g.Go(func() error {
 		return startServer(gctx, config, monitorServer, logger)
 	})

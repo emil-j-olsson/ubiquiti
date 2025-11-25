@@ -77,8 +77,8 @@ func (s *MonitorService) ListDevices(ctx context.Context) ([]types.Device, error
 	return s.persistence.ListDevices(ctx)
 }
 
-func (s *MonitorService) UpdateDevice(ctx context.Context, dev string, status types.DeviceStatus) error {
-	result, err := s.persistence.GetDevice(ctx, dev)
+func (s *MonitorService) UpdateDevice(ctx context.Context, deviceID string, status types.DeviceStatus) error {
+	result, err := s.persistence.GetDevice(ctx, deviceID)
 	if err != nil {
 		return err
 	}
@@ -112,11 +112,11 @@ func (s *MonitorService) UpdateDevice(ctx context.Context, dev string, status ty
 	return nil
 }
 
-func (s *MonitorService) GetDiagnostics(ctx context.Context, device string) (types.Diagnostics, error) {
-	return s.persistence.GetDiagnostics(ctx, device)
+func (s *MonitorService) GetDiagnostics(ctx context.Context, deviceID string) (types.Diagnostics, error) {
+	return s.persistence.GetDiagnostics(ctx, deviceID)
 }
 
-func (s *MonitorService) StreamDiagnostics(ctx context.Context, device string) <-chan types.Diagnostics {
+func (s *MonitorService) StreamDiagnostics(ctx context.Context, deviceID string) <-chan types.Diagnostics {
 	ch := make(chan types.Diagnostics)
 	interval := s.config.StreamInterval
 	go func() {
@@ -128,11 +128,11 @@ func (s *MonitorService) StreamDiagnostics(ctx context.Context, device string) <
 			case <-ctx.Done():
 				return
 			case <-ticker.C:
-				diagnostics, err := s.persistence.GetDiagnostics(ctx, device)
+				diagnostics, err := s.persistence.GetDiagnostics(ctx, deviceID)
 				if err != nil {
 					s.logger.Error(
 						"failed to get diagnostics for streaming",
-						zap.String("device", device),
+						zap.String("device", deviceID),
 						zap.Error(err),
 					)
 					continue
