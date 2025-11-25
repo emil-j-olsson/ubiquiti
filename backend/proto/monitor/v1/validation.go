@@ -21,6 +21,19 @@ func (r *RegisterDeviceRequest) Validate() error {
 	return nil
 }
 
+func (r *UpdateDeviceRequest) Validate() error {
+	if r == nil {
+		return errors.New("empty request")
+	}
+	if len(r.GetDeviceId()) == 0 {
+		return errors.New("missing device_id in request")
+	}
+	if r.GetDeviceStatus() == DeviceStatus_DEVICE_STATUS_UNSPECIFIED {
+		return errors.New("missing device_status in request")
+	}
+	return nil
+}
+
 func (r *DiagnosticsRequest) Validate() error {
 	if r == nil {
 		return errors.New("empty request")

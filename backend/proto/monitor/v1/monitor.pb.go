@@ -526,6 +526,58 @@ func (x *ListDevicesResponse) GetDevices() []*Device {
 	return nil
 }
 
+type UpdateDeviceRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DeviceId      string                 `protobuf:"bytes,1,opt,name=device_id,proto3" json:"device_id,omitempty"`
+	DeviceStatus  DeviceStatus           `protobuf:"varint,2,opt,name=device_status,proto3,enum=monitor.v1.DeviceStatus" json:"device_status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateDeviceRequest) Reset() {
+	*x = UpdateDeviceRequest{}
+	mi := &file_proto_monitor_v1_monitor_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateDeviceRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateDeviceRequest) ProtoMessage() {}
+
+func (x *UpdateDeviceRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_monitor_v1_monitor_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateDeviceRequest.ProtoReflect.Descriptor instead.
+func (*UpdateDeviceRequest) Descriptor() ([]byte, []int) {
+	return file_proto_monitor_v1_monitor_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *UpdateDeviceRequest) GetDeviceId() string {
+	if x != nil {
+		return x.DeviceId
+	}
+	return ""
+}
+
+func (x *UpdateDeviceRequest) GetDeviceStatus() DeviceStatus {
+	if x != nil {
+		return x.DeviceStatus
+	}
+	return DeviceStatus_DEVICE_STATUS_UNSPECIFIED
+}
+
 type DiagnosticsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	DeviceId      string                 `protobuf:"bytes,1,opt,name=device_id,proto3" json:"device_id,omitempty"`
@@ -535,7 +587,7 @@ type DiagnosticsRequest struct {
 
 func (x *DiagnosticsRequest) Reset() {
 	*x = DiagnosticsRequest{}
-	mi := &file_proto_monitor_v1_monitor_proto_msgTypes[5]
+	mi := &file_proto_monitor_v1_monitor_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -547,7 +599,7 @@ func (x *DiagnosticsRequest) String() string {
 func (*DiagnosticsRequest) ProtoMessage() {}
 
 func (x *DiagnosticsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_monitor_v1_monitor_proto_msgTypes[5]
+	mi := &file_proto_monitor_v1_monitor_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -560,7 +612,7 @@ func (x *DiagnosticsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DiagnosticsRequest.ProtoReflect.Descriptor instead.
 func (*DiagnosticsRequest) Descriptor() ([]byte, []int) {
-	return file_proto_monitor_v1_monitor_proto_rawDescGZIP(), []int{5}
+	return file_proto_monitor_v1_monitor_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *DiagnosticsRequest) GetDeviceId() string {
@@ -581,7 +633,7 @@ type DiagnosticsResponse struct {
 
 func (x *DiagnosticsResponse) Reset() {
 	*x = DiagnosticsResponse{}
-	mi := &file_proto_monitor_v1_monitor_proto_msgTypes[6]
+	mi := &file_proto_monitor_v1_monitor_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -593,7 +645,7 @@ func (x *DiagnosticsResponse) String() string {
 func (*DiagnosticsResponse) ProtoMessage() {}
 
 func (x *DiagnosticsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_monitor_v1_monitor_proto_msgTypes[6]
+	mi := &file_proto_monitor_v1_monitor_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -606,7 +658,7 @@ func (x *DiagnosticsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DiagnosticsResponse.ProtoReflect.Descriptor instead.
 func (*DiagnosticsResponse) Descriptor() ([]byte, []int) {
-	return file_proto_monitor_v1_monitor_proto_rawDescGZIP(), []int{6}
+	return file_proto_monitor_v1_monitor_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *DiagnosticsResponse) GetDevice() *Device {
@@ -628,58 +680,6 @@ func (x *DiagnosticsResponse) GetUpdatedAt() *timestamppb.Timestamp {
 		return x.UpdatedAt
 	}
 	return nil
-}
-
-type UpdateSimulatedDeviceRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	DeviceId      string                 `protobuf:"bytes,1,opt,name=device_id,proto3" json:"device_id,omitempty"`
-	DeviceStatus  DeviceStatus           `protobuf:"varint,2,opt,name=device_status,proto3,enum=monitor.v1.DeviceStatus" json:"device_status,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateSimulatedDeviceRequest) Reset() {
-	*x = UpdateSimulatedDeviceRequest{}
-	mi := &file_proto_monitor_v1_monitor_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateSimulatedDeviceRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateSimulatedDeviceRequest) ProtoMessage() {}
-
-func (x *UpdateSimulatedDeviceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_monitor_v1_monitor_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateSimulatedDeviceRequest.ProtoReflect.Descriptor instead.
-func (*UpdateSimulatedDeviceRequest) Descriptor() ([]byte, []int) {
-	return file_proto_monitor_v1_monitor_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *UpdateSimulatedDeviceRequest) GetDeviceId() string {
-	if x != nil {
-		return x.DeviceId
-	}
-	return ""
-}
-
-func (x *UpdateSimulatedDeviceRequest) GetDeviceStatus() DeviceStatus {
-	if x != nil {
-		return x.DeviceStatus
-	}
-	return DeviceStatus_DEVICE_STATUS_UNSPECIFIED
 }
 
 var File_proto_monitor_v1_monitor_proto protoreflect.FileDescriptor
@@ -723,7 +723,10 @@ const file_proto_monitor_v1_monitor_proto_rawDesc = "" +
 	"\x16RegisterDeviceResponse\x12*\n" +
 	"\x06device\x18\x01 \x01(\v2\x12.monitor.v1.DeviceR\x06device\"C\n" +
 	"\x13ListDevicesResponse\x12,\n" +
-	"\adevices\x18\x01 \x03(\v2\x12.monitor.v1.DeviceR\adevices\"2\n" +
+	"\adevices\x18\x01 \x03(\v2\x12.monitor.v1.DeviceR\adevices\"s\n" +
+	"\x13UpdateDeviceRequest\x12\x1c\n" +
+	"\tdevice_id\x18\x01 \x01(\tR\tdevice_id\x12>\n" +
+	"\rdevice_status\x18\x02 \x01(\x0e2\x18.monitor.v1.DeviceStatusR\rdevice_status\"2\n" +
 	"\x12DiagnosticsRequest\x12\x1c\n" +
 	"\tdevice_id\x18\x01 \x01(\tR\tdevice_id\"\xb8\x01\n" +
 	"\x13DiagnosticsResponse\x12*\n" +
@@ -731,10 +734,7 @@ const file_proto_monitor_v1_monitor_proto_rawDesc = "" +
 	"\vdiagnostics\x18\x02 \x01(\v2\x17.monitor.v1.DiagnosticsR\vdiagnostics\x12:\n" +
 	"\n" +
 	"updated_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
-	"updated_at\"|\n" +
-	"\x1cUpdateSimulatedDeviceRequest\x12\x1c\n" +
-	"\tdevice_id\x18\x01 \x01(\tR\tdevice_id\x12>\n" +
-	"\rdevice_status\x18\x02 \x01(\x0e2\x18.monitor.v1.DeviceStatusR\rdevice_status*~\n" +
+	"updated_at*~\n" +
 	"\bProtocol\x12\x18\n" +
 	"\x14PROTOCOL_UNSPECIFIED\x10\x00\x12\x11\n" +
 	"\rPROTOCOL_HTTP\x10\x01\x12\x18\n" +
@@ -747,15 +747,15 @@ const file_proto_monitor_v1_monitor_proto_rawDesc = "" +
 	"\x16DEVICE_STATUS_DEGRADED\x10\x02\x12\x17\n" +
 	"\x13DEVICE_STATUS_ERROR\x10\x03\x12\x1d\n" +
 	"\x19DEVICE_STATUS_MAINTENANCE\x10\x04\x12\x19\n" +
-	"\x15DEVICE_STATUS_BOOTING\x10\x052\xbc\x05\n" +
+	"\x15DEVICE_STATUS_BOOTING\x10\x052\x9e\x05\n" +
 	"\aMonitor\x12O\n" +
 	"\tGetHealth\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\"\x12\x82\xd3\xe4\x93\x02\f\x12\n" +
 	"/v1/health\x12{\n" +
 	"\x0eRegisterDevice\x12!.monitor.v1.RegisterDeviceRequest\x1a\".monitor.v1.RegisterDeviceResponse\"\"\x82\xd3\xe4\x93\x02\x1c:\x01*\"\x17/v1/devices/{device_id}\x12[\n" +
-	"\vListDevices\x12\x16.google.protobuf.Empty\x1a\x1f.monitor.v1.ListDevicesResponse\"\x13\x82\xd3\xe4\x93\x02\r\x12\v/v1/devices\x12v\n" +
+	"\vListDevices\x12\x16.google.protobuf.Empty\x1a\x1f.monitor.v1.ListDevicesResponse\"\x13\x82\xd3\xe4\x93\x02\r\x12\v/v1/devices\x12k\n" +
+	"\fUpdateDevice\x12\x1f.monitor.v1.UpdateDeviceRequest\x1a\x16.google.protobuf.Empty\"\"\x82\xd3\xe4\x93\x02\x1c:\x01*2\x17/v1/devices/{device_id}\x12v\n" +
 	"\x0eGetDiagnostics\x12\x1e.monitor.v1.DiagnosticsRequest\x1a\x1f.monitor.v1.DiagnosticsResponse\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/v1/diagnostics/{device_id}\x12\x82\x01\n" +
-	"\x11StreamDiagnostics\x12\x1e.monitor.v1.DiagnosticsRequest\x1a\x1f.monitor.v1.DiagnosticsResponse\"*\x82\xd3\xe4\x93\x02$\x12\"/v1/diagnostics/{device_id}/stream0\x01\x12\x88\x01\n" +
-	"\x15UpdateSimulatedDevice\x12(.monitor.v1.UpdateSimulatedDeviceRequest\x1a\x16.google.protobuf.Empty\"-\x82\xd3\xe4\x93\x02':\x01*2\"/v1/devices/{device_id}/simulationBFZDgithub.com/emil-j-olsson/ubiquiti/backend/proto/monitor/v1;monitorv1b\x06proto3"
+	"\x11StreamDiagnostics\x12\x1e.monitor.v1.DiagnosticsRequest\x1a\x1f.monitor.v1.DiagnosticsResponse\"*\x82\xd3\xe4\x93\x02$\x12\"/v1/diagnostics/{device_id}/stream0\x01BFZDgithub.com/emil-j-olsson/ubiquiti/backend/proto/monitor/v1;monitorv1b\x06proto3"
 
 var (
 	file_proto_monitor_v1_monitor_proto_rawDescOnce sync.Once
@@ -772,18 +772,18 @@ func file_proto_monitor_v1_monitor_proto_rawDescGZIP() []byte {
 var file_proto_monitor_v1_monitor_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
 var file_proto_monitor_v1_monitor_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_proto_monitor_v1_monitor_proto_goTypes = []any{
-	(Protocol)(0),                        // 0: monitor.v1.Protocol
-	(DeviceStatus)(0),                    // 1: monitor.v1.DeviceStatus
-	(*Device)(nil),                       // 2: monitor.v1.Device
-	(*Diagnostics)(nil),                  // 3: monitor.v1.Diagnostics
-	(*RegisterDeviceRequest)(nil),        // 4: monitor.v1.RegisterDeviceRequest
-	(*RegisterDeviceResponse)(nil),       // 5: monitor.v1.RegisterDeviceResponse
-	(*ListDevicesResponse)(nil),          // 6: monitor.v1.ListDevicesResponse
-	(*DiagnosticsRequest)(nil),           // 7: monitor.v1.DiagnosticsRequest
-	(*DiagnosticsResponse)(nil),          // 8: monitor.v1.DiagnosticsResponse
-	(*UpdateSimulatedDeviceRequest)(nil), // 9: monitor.v1.UpdateSimulatedDeviceRequest
-	(*timestamppb.Timestamp)(nil),        // 10: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),                // 11: google.protobuf.Empty
+	(Protocol)(0),                  // 0: monitor.v1.Protocol
+	(DeviceStatus)(0),              // 1: monitor.v1.DeviceStatus
+	(*Device)(nil),                 // 2: monitor.v1.Device
+	(*Diagnostics)(nil),            // 3: monitor.v1.Diagnostics
+	(*RegisterDeviceRequest)(nil),  // 4: monitor.v1.RegisterDeviceRequest
+	(*RegisterDeviceResponse)(nil), // 5: monitor.v1.RegisterDeviceResponse
+	(*ListDevicesResponse)(nil),    // 6: monitor.v1.ListDevicesResponse
+	(*UpdateDeviceRequest)(nil),    // 7: monitor.v1.UpdateDeviceRequest
+	(*DiagnosticsRequest)(nil),     // 8: monitor.v1.DiagnosticsRequest
+	(*DiagnosticsResponse)(nil),    // 9: monitor.v1.DiagnosticsResponse
+	(*timestamppb.Timestamp)(nil),  // 10: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),          // 11: google.protobuf.Empty
 }
 var file_proto_monitor_v1_monitor_proto_depIdxs = []int32{
 	0,  // 0: monitor.v1.Device.supported_protocols:type_name -> monitor.v1.Protocol
@@ -793,22 +793,22 @@ var file_proto_monitor_v1_monitor_proto_depIdxs = []int32{
 	0,  // 4: monitor.v1.RegisterDeviceRequest.protocol:type_name -> monitor.v1.Protocol
 	2,  // 5: monitor.v1.RegisterDeviceResponse.device:type_name -> monitor.v1.Device
 	2,  // 6: monitor.v1.ListDevicesResponse.devices:type_name -> monitor.v1.Device
-	2,  // 7: monitor.v1.DiagnosticsResponse.device:type_name -> monitor.v1.Device
-	3,  // 8: monitor.v1.DiagnosticsResponse.diagnostics:type_name -> monitor.v1.Diagnostics
-	10, // 9: monitor.v1.DiagnosticsResponse.updated_at:type_name -> google.protobuf.Timestamp
-	1,  // 10: monitor.v1.UpdateSimulatedDeviceRequest.device_status:type_name -> monitor.v1.DeviceStatus
+	1,  // 7: monitor.v1.UpdateDeviceRequest.device_status:type_name -> monitor.v1.DeviceStatus
+	2,  // 8: monitor.v1.DiagnosticsResponse.device:type_name -> monitor.v1.Device
+	3,  // 9: monitor.v1.DiagnosticsResponse.diagnostics:type_name -> monitor.v1.Diagnostics
+	10, // 10: monitor.v1.DiagnosticsResponse.updated_at:type_name -> google.protobuf.Timestamp
 	11, // 11: monitor.v1.Monitor.GetHealth:input_type -> google.protobuf.Empty
 	4,  // 12: monitor.v1.Monitor.RegisterDevice:input_type -> monitor.v1.RegisterDeviceRequest
 	11, // 13: monitor.v1.Monitor.ListDevices:input_type -> google.protobuf.Empty
-	7,  // 14: monitor.v1.Monitor.GetDiagnostics:input_type -> monitor.v1.DiagnosticsRequest
-	7,  // 15: monitor.v1.Monitor.StreamDiagnostics:input_type -> monitor.v1.DiagnosticsRequest
-	9,  // 16: monitor.v1.Monitor.UpdateSimulatedDevice:input_type -> monitor.v1.UpdateSimulatedDeviceRequest
+	7,  // 14: monitor.v1.Monitor.UpdateDevice:input_type -> monitor.v1.UpdateDeviceRequest
+	8,  // 15: monitor.v1.Monitor.GetDiagnostics:input_type -> monitor.v1.DiagnosticsRequest
+	8,  // 16: monitor.v1.Monitor.StreamDiagnostics:input_type -> monitor.v1.DiagnosticsRequest
 	11, // 17: monitor.v1.Monitor.GetHealth:output_type -> google.protobuf.Empty
 	5,  // 18: monitor.v1.Monitor.RegisterDevice:output_type -> monitor.v1.RegisterDeviceResponse
 	6,  // 19: monitor.v1.Monitor.ListDevices:output_type -> monitor.v1.ListDevicesResponse
-	8,  // 20: monitor.v1.Monitor.GetDiagnostics:output_type -> monitor.v1.DiagnosticsResponse
-	8,  // 21: monitor.v1.Monitor.StreamDiagnostics:output_type -> monitor.v1.DiagnosticsResponse
-	11, // 22: monitor.v1.Monitor.UpdateSimulatedDevice:output_type -> google.protobuf.Empty
+	11, // 20: monitor.v1.Monitor.UpdateDevice:output_type -> google.protobuf.Empty
+	9,  // 21: monitor.v1.Monitor.GetDiagnostics:output_type -> monitor.v1.DiagnosticsResponse
+	9,  // 22: monitor.v1.Monitor.StreamDiagnostics:output_type -> monitor.v1.DiagnosticsResponse
 	17, // [17:23] is the sub-list for method output_type
 	11, // [11:17] is the sub-list for method input_type
 	11, // [11:11] is the sub-list for extension type_name

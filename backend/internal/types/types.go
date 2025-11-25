@@ -158,6 +158,23 @@ func (d *DeviceStatus) Proto() monitorv1.DeviceStatus {
 	}
 }
 
+func (d *DeviceStatus) DeviceProto() devicev1.DeviceStatus {
+	switch *d {
+	case DeviceStatusHealthy:
+		return devicev1.DeviceStatus_DEVICE_STATUS_HEALTHY
+	case DeviceStatusDegraded:
+		return devicev1.DeviceStatus_DEVICE_STATUS_DEGRADED
+	case DeviceStatusError:
+		return devicev1.DeviceStatus_DEVICE_STATUS_ERROR
+	case DeviceStatusMaintenance:
+		return devicev1.DeviceStatus_DEVICE_STATUS_MAINTENANCE
+	case DeviceStatusBooting:
+		return devicev1.DeviceStatus_DEVICE_STATUS_BOOTING
+	default:
+		return devicev1.DeviceStatus_DEVICE_STATUS_UNSPECIFIED
+	}
+}
+
 func DeviceStatusFromString(value string) DeviceStatus {
 	parsed, err := ParseDeviceStatus(value)
 	if err != nil {

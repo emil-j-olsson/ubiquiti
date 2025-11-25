@@ -24,6 +24,12 @@ service Monitor {
             get: "/v1/devices"
         };
     }
+    rpc UpdateDevice(UpdateDeviceRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            patch: "/v1/devices/{device_id}"
+            body: "*"
+        };
+    }
     rpc GetDiagnostics(DiagnosticsRequest) returns (DiagnosticsResponse) {
         option (google.api.http) = {
             get: "/v1/diagnostics/{device_id}"
@@ -32,12 +38,6 @@ service Monitor {
     rpc StreamDiagnostics(DiagnosticsRequest) returns (stream DiagnosticsResponse) {
         option (google.api.http) = {
             get: "/v1/diagnostics/{device_id}/stream"
-        };
-    }
-    rpc UpdateSimulatedDevice(UpdateSimulatedDeviceRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-            patch: "/v1/devices/{device_id}/simulation"
-            body: "*"
         };
     }
 }
@@ -100,6 +100,11 @@ message ListDevicesResponse {
     repeated Device devices = 1;
 }
 
+message UpdateDeviceRequest {
+    string device_id = 1 [json_name="device_id"];
+    DeviceStatus device_status = 2 [json_name="device_status"];
+}
+
 message DiagnosticsRequest {
     string device_id = 1 [json_name="device_id"];
 }
@@ -108,9 +113,4 @@ message DiagnosticsResponse {
     Device device = 1;
     Diagnostics diagnostics = 2;
     google.protobuf.Timestamp updated_at = 3 [json_name="updated_at"];
-}
-
-message UpdateSimulatedDeviceRequest {
-    string device_id = 1 [json_name="device_id"];
-    DeviceStatus device_status = 2 [json_name="device_status"];
 }

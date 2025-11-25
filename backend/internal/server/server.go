@@ -29,6 +29,7 @@ var (
 type Provider interface {
 	RegisterDevice(ctx context.Context, reg types.DeviceRegistration) (types.Device, error)
 	ListDevices(ctx context.Context) ([]types.Device, error)
+	UpdateDevice(ctx context.Context, device string, status types.DeviceStatus) error
 	GetDiagnostics(ctx context.Context, device string) (types.Diagnostics, error)
 	StreamDiagnostics(ctx context.Context, device string) <-chan types.Diagnostics
 }
@@ -92,11 +93,28 @@ func (s *Server) ListDevices(ctx context.Context, _ *emptypb.Empty) (*monitorv1.
 	return &monitorv1.ListDevicesResponse{Devices: devices}, nil
 }
 
+func (s *Server) UpdateDevice(
+	ctx context.Context,
+	req *monitorv1.UpdateDeviceRequest,
+) (*emptypb.Empty, error) {
+	ctx, cancel := context.WithTimeout(ctx, DefaultContextTimeout)
+	defer cancel()
+	if err := req.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	status := types.DeviceStatusFromString(req.GetDeviceStatus().String())
+	err := s.provider.UpdateDevice(ctx, req.GetDeviceId(), status)
+	if err != nil {
+		return nil, s.databaseError(err)
+	}
+	return &emptypb.Empty{}, nil
+}
+
 func (s *Server) GetDiagnostics(
 	ctx context.Context,
 	req *monitorv1.DiagnosticsRequest,
 ) (*monitorv1.DiagnosticsResponse, error) {
-	_, cancel := context.WithTimeout(ctx, DefaultContextTimeout)
+	ctx, cancel := context.WithTimeout(ctx, DefaultContextTimeout)
 	defer cancel()
 	if err := req.Validate(); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())

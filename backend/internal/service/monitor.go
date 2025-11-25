@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/emil-j-olsson/ubiquiti/backend/internal/device"
@@ -15,6 +16,7 @@ type PersistenceProvider interface {
 		status types.DeviceHealthStatus,
 		reg types.DeviceRegistration,
 	) (types.Device, error)
+	GetDevice(ctx context.Context, device string) (types.Device, error)
 	ListDevices(ctx context.Context) ([]types.Device, error)
 	GetDiagnostics(ctx context.Context, device string) (types.Diagnostics, error)
 }
@@ -73,6 +75,41 @@ func (s *MonitorService) RegisterDevice(
 
 func (s *MonitorService) ListDevices(ctx context.Context) ([]types.Device, error) {
 	return s.persistence.ListDevices(ctx)
+}
+
+func (s *MonitorService) UpdateDevice(ctx context.Context, dev string, status types.DeviceStatus) error {
+	result, err := s.persistence.GetDevice(ctx, dev)
+	if err != nil {
+		return err
+	}
+	supported := *result.SupportedProtocols
+	if len(supported) == 0 {
+		return errors.New("device has no supported protocols")
+	}
+	protocol := types.Protocol(supported[0])
+	for _, p := range supported {
+		if proto := types.Protocol(p); proto.IsGrpc() {
+			protocol = proto
+			break
+		}
+	}
+	port := result.Port
+	if protocol.IsHttp() {
+		port = result.GatewayPort
+	}
+	client, err := s.device.CreateClient(device.Config{
+		Protocol: protocol,
+		Host:     *result.Host,
+		Port:     *port,
+	})
+	if err != nil {
+		return err
+	}
+	err = client.UpdateDevice(ctx, status)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *MonitorService) GetDiagnostics(ctx context.Context, device string) (types.Diagnostics, error) {

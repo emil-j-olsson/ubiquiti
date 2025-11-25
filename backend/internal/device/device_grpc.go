@@ -58,7 +58,13 @@ func (d *ClientGrpc) GetHealth(ctx context.Context) (*types.DeviceHealthStatus, 
 
 // StreamDiagnostics
 
-// UpdateDevice
+func (d *ClientGrpc) UpdateDevice(ctx context.Context, status types.DeviceStatus) error {
+	_, err := d.client.UpdateDevice(ctx, &devicev1.UpdateDeviceRequest{DeviceStatus: status.DeviceProto()})
+	if err != nil {
+		return fmt.Errorf("failed to perform device update request (grpc): %w", err)
+	}
+	return nil
+}
 
 func (d *ClientGrpc) Close() error {
 	if d.conn != nil {

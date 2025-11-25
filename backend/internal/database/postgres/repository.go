@@ -78,6 +78,34 @@ func (r *PersistenceRepository) RegisterDevice(
 	return result, nil
 }
 
+func (r *PersistenceRepository) GetDevice(ctx context.Context, device string) (types.Device, error) {
+	rows, err := r.pool.Query(ctx, `select * from devices where device_id = $1`, device)
+	if err != nil {
+		return types.Device{}, fmt.Errorf(
+			"%w: failed to query device (postgres): %w",
+			exceptions.ErrorInternal,
+			err,
+		)
+	}
+	result, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[types.Device])
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return types.Device{}, fmt.Errorf(
+				"%w: failed to retrieve device '%s': %w",
+				exceptions.ErrorNotFound,
+				device,
+				err,
+			)
+		}
+		return types.Device{}, fmt.Errorf(
+			"%w: failed to collect device rows (postgres): %w",
+			exceptions.ErrorInternal,
+			err,
+		)
+	}
+	return result, nil
+}
+
 func (r *PersistenceRepository) ListDevices(ctx context.Context) ([]types.Device, error) {
 	rows, err := r.pool.Query(ctx, `select * from devices order by created_at desc`)
 	if err != nil {

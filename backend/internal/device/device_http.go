@@ -1,6 +1,7 @@
 package device
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -47,6 +48,7 @@ func (d *ClientHttp) GetHealth(ctx context.Context) (*types.DeviceHealthStatus, 
 	if err != nil {
 		return nil, fmt.Errorf("failed to perform health request (http): %w", err)
 	}
+	response.Body.Close() // nolint:errcheck
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body (http): %w", err)
@@ -74,7 +76,32 @@ func (d *ClientHttp) GetHealth(ctx context.Context) (*types.DeviceHealthStatus, 
 
 // StreamDiagnostics
 
-// UpdateDevice
+func (d *ClientHttp) UpdateDevice(ctx context.Context, status types.DeviceStatus) error {
+	endpoint, err := url.JoinPath(d.url, "/v1/device")
+	if err != nil {
+		return fmt.Errorf("failed to join url path (http): %w", err)
+	}
+	body := &devicev1.UpdateDeviceRequest{DeviceStatus: status.DeviceProto()}
+	marshaled, err := protojson.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("failed to marshal update device request (http): %w", err)
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, endpoint, bytes.NewReader(marshaled))
+	if err != nil {
+		return fmt.Errorf("failed to create update device request (http): %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	response, err := d.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to perform update device request (http): %w", err)
+	}
+	defer response.Body.Close() // nolint:errcheck
+	if response.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(response.Body)
+		return fmt.Errorf("failed request with status %d (http): %s", response.StatusCode, string(body))
+	}
+	return nil
+}
 
 func (d *ClientHttp) Close() error {
 	d.client.CloseIdleConnections()

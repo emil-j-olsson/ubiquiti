@@ -21,12 +21,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Monitor_GetHealth_FullMethodName             = "/monitor.v1.Monitor/GetHealth"
-	Monitor_RegisterDevice_FullMethodName        = "/monitor.v1.Monitor/RegisterDevice"
-	Monitor_ListDevices_FullMethodName           = "/monitor.v1.Monitor/ListDevices"
-	Monitor_GetDiagnostics_FullMethodName        = "/monitor.v1.Monitor/GetDiagnostics"
-	Monitor_StreamDiagnostics_FullMethodName     = "/monitor.v1.Monitor/StreamDiagnostics"
-	Monitor_UpdateSimulatedDevice_FullMethodName = "/monitor.v1.Monitor/UpdateSimulatedDevice"
+	Monitor_GetHealth_FullMethodName         = "/monitor.v1.Monitor/GetHealth"
+	Monitor_RegisterDevice_FullMethodName    = "/monitor.v1.Monitor/RegisterDevice"
+	Monitor_ListDevices_FullMethodName       = "/monitor.v1.Monitor/ListDevices"
+	Monitor_UpdateDevice_FullMethodName      = "/monitor.v1.Monitor/UpdateDevice"
+	Monitor_GetDiagnostics_FullMethodName    = "/monitor.v1.Monitor/GetDiagnostics"
+	Monitor_StreamDiagnostics_FullMethodName = "/monitor.v1.Monitor/StreamDiagnostics"
 )
 
 // MonitorClient is the client API for Monitor service.
@@ -36,9 +36,9 @@ type MonitorClient interface {
 	GetHealth(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	RegisterDevice(ctx context.Context, in *RegisterDeviceRequest, opts ...grpc.CallOption) (*RegisterDeviceResponse, error)
 	ListDevices(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListDevicesResponse, error)
+	UpdateDevice(ctx context.Context, in *UpdateDeviceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetDiagnostics(ctx context.Context, in *DiagnosticsRequest, opts ...grpc.CallOption) (*DiagnosticsResponse, error)
 	StreamDiagnostics(ctx context.Context, in *DiagnosticsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[DiagnosticsResponse], error)
-	UpdateSimulatedDevice(ctx context.Context, in *UpdateSimulatedDeviceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type monitorClient struct {
@@ -79,6 +79,16 @@ func (c *monitorClient) ListDevices(ctx context.Context, in *emptypb.Empty, opts
 	return out, nil
 }
 
+func (c *monitorClient) UpdateDevice(ctx context.Context, in *UpdateDeviceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, Monitor_UpdateDevice_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *monitorClient) GetDiagnostics(ctx context.Context, in *DiagnosticsRequest, opts ...grpc.CallOption) (*DiagnosticsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DiagnosticsResponse)
@@ -108,16 +118,6 @@ func (c *monitorClient) StreamDiagnostics(ctx context.Context, in *DiagnosticsRe
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Monitor_StreamDiagnosticsClient = grpc.ServerStreamingClient[DiagnosticsResponse]
 
-func (c *monitorClient) UpdateSimulatedDevice(ctx context.Context, in *UpdateSimulatedDeviceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, Monitor_UpdateSimulatedDevice_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // MonitorServer is the server API for Monitor service.
 // All implementations must embed UnimplementedMonitorServer
 // for forward compatibility.
@@ -125,9 +125,9 @@ type MonitorServer interface {
 	GetHealth(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 	RegisterDevice(context.Context, *RegisterDeviceRequest) (*RegisterDeviceResponse, error)
 	ListDevices(context.Context, *emptypb.Empty) (*ListDevicesResponse, error)
+	UpdateDevice(context.Context, *UpdateDeviceRequest) (*emptypb.Empty, error)
 	GetDiagnostics(context.Context, *DiagnosticsRequest) (*DiagnosticsResponse, error)
 	StreamDiagnostics(*DiagnosticsRequest, grpc.ServerStreamingServer[DiagnosticsResponse]) error
-	UpdateSimulatedDevice(context.Context, *UpdateSimulatedDeviceRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedMonitorServer()
 }
 
@@ -147,14 +147,14 @@ func (UnimplementedMonitorServer) RegisterDevice(context.Context, *RegisterDevic
 func (UnimplementedMonitorServer) ListDevices(context.Context, *emptypb.Empty) (*ListDevicesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListDevices not implemented")
 }
+func (UnimplementedMonitorServer) UpdateDevice(context.Context, *UpdateDeviceRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateDevice not implemented")
+}
 func (UnimplementedMonitorServer) GetDiagnostics(context.Context, *DiagnosticsRequest) (*DiagnosticsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDiagnostics not implemented")
 }
 func (UnimplementedMonitorServer) StreamDiagnostics(*DiagnosticsRequest, grpc.ServerStreamingServer[DiagnosticsResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method StreamDiagnostics not implemented")
-}
-func (UnimplementedMonitorServer) UpdateSimulatedDevice(context.Context, *UpdateSimulatedDeviceRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateSimulatedDevice not implemented")
 }
 func (UnimplementedMonitorServer) mustEmbedUnimplementedMonitorServer() {}
 func (UnimplementedMonitorServer) testEmbeddedByValue()                 {}
@@ -231,6 +231,24 @@ func _Monitor_ListDevices_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Monitor_UpdateDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateDeviceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MonitorServer).UpdateDevice(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Monitor_UpdateDevice_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MonitorServer).UpdateDevice(ctx, req.(*UpdateDeviceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Monitor_GetDiagnostics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DiagnosticsRequest)
 	if err := dec(in); err != nil {
@@ -260,24 +278,6 @@ func _Monitor_StreamDiagnostics_Handler(srv interface{}, stream grpc.ServerStrea
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Monitor_StreamDiagnosticsServer = grpc.ServerStreamingServer[DiagnosticsResponse]
 
-func _Monitor_UpdateSimulatedDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateSimulatedDeviceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MonitorServer).UpdateSimulatedDevice(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Monitor_UpdateSimulatedDevice_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MonitorServer).UpdateSimulatedDevice(ctx, req.(*UpdateSimulatedDeviceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // Monitor_ServiceDesc is the grpc.ServiceDesc for Monitor service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -298,12 +298,12 @@ var Monitor_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Monitor_ListDevices_Handler,
 		},
 		{
-			MethodName: "GetDiagnostics",
-			Handler:    _Monitor_GetDiagnostics_Handler,
+			MethodName: "UpdateDevice",
+			Handler:    _Monitor_UpdateDevice_Handler,
 		},
 		{
-			MethodName: "UpdateSimulatedDevice",
-			Handler:    _Monitor_UpdateSimulatedDevice_Handler,
+			MethodName: "GetDiagnostics",
+			Handler:    _Monitor_GetDiagnostics_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
