@@ -142,6 +142,7 @@ ENUM(
 	error = DEVICE_STATUS_ERROR
 	maintenance = DEVICE_STATUS_MAINTENANCE
 	booting = DEVICE_STATUS_BOOTING
+	offline = DEVICE_STATUS_OFFLINE
 
 )
 */
@@ -159,6 +160,8 @@ func (d *DeviceStatus) Proto() monitorv1.DeviceStatus {
 		return monitorv1.DeviceStatus_DEVICE_STATUS_MAINTENANCE
 	case DeviceStatusBooting:
 		return monitorv1.DeviceStatus_DEVICE_STATUS_BOOTING
+	case DeviceStatusOffline:
+		return monitorv1.DeviceStatus_DEVICE_STATUS_OFFLINE
 	default:
 		return monitorv1.DeviceStatus_DEVICE_STATUS_UNSPECIFIED
 	}

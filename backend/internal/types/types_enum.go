@@ -84,6 +84,8 @@ const (
 	DeviceStatusMaintenance DeviceStatus = "DEVICE_STATUS_MAINTENANCE"
 	// DeviceStatusBooting is a DeviceStatus of type booting.
 	DeviceStatusBooting DeviceStatus = "DEVICE_STATUS_BOOTING"
+	// DeviceStatusOffline is a DeviceStatus of type offline.
+	DeviceStatusOffline DeviceStatus = "DEVICE_STATUS_OFFLINE"
 )
 
 var ErrInvalidDeviceStatus = errors.New("not a valid DeviceStatus")
@@ -106,6 +108,7 @@ var _DeviceStatusValue = map[string]DeviceStatus{
 	"DEVICE_STATUS_ERROR":       DeviceStatusError,
 	"DEVICE_STATUS_MAINTENANCE": DeviceStatusMaintenance,
 	"DEVICE_STATUS_BOOTING":     DeviceStatusBooting,
+	"DEVICE_STATUS_OFFLINE":     DeviceStatusOffline,
 }
 
 // ParseDeviceStatus attempts to convert a string to a DeviceStatus.

@@ -152,3 +152,34 @@ func (r *PersistenceRepository) GetDiagnostics(
 	}
 	return result, nil
 }
+
+func (r *PersistenceRepository) SaveDiagnostics(ctx context.Context, diag types.DeviceDiagnostics) error {
+	_, err := r.pool.Exec(ctx, `
+		insert into device_diagnostics (
+			device_id, cpu_usage, memory_usage, device_status,
+            hardware_version, software_version, firmware_version,
+            checksum, timestamp
+		) values (
+			(select id from devices where device_id = $1),
+            $2, $3, $4, $5, $6, $7, $8, $9
+		)
+	`,
+		diag.Identifier,
+		diag.CPU,
+		diag.Memory,
+		diag.DeviceStatus,
+		diag.DeviceVersions.Hardware,
+		diag.DeviceVersions.Software,
+		diag.DeviceVersions.Firmware,
+		diag.Checksum,
+		diag.Timestamp,
+	)
+	if err != nil {
+		return fmt.Errorf(
+			"%w: failed to insert diagnostics (postgres): %w",
+			exceptions.ErrorInternal,
+			err,
+		)
+	}
+	return nil
+}

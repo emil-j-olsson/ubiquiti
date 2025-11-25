@@ -3,6 +3,7 @@ package device
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -34,7 +35,6 @@ func NewClientHttp(config Config) *ClientHttp {
 	}
 }
 
-// TODO: make generic request logic and reuse code...
 func (d *ClientHttp) GetHealth(ctx context.Context) (*types.DeviceHealthStatus, error) {
 	endpoint, err := url.JoinPath(d.url, "/v1/health")
 	if err != nil {
@@ -105,7 +105,60 @@ func (d *ClientHttp) GetDiagnostics(ctx context.Context) (*types.DeviceDiagnosti
 	return d.diagnostics(&res), nil
 }
 
-// StreamDiagnostics
+func (d *ClientHttp) StreamDiagnostics(ctx context.Context) (<-chan *types.DeviceDiagnostics, <-chan error) {
+	ch := make(chan *types.DeviceDiagnostics)
+	errCh := make(chan error, 1)
+	go func() {
+		defer close(ch)
+		defer close(errCh)
+		endpoint, err := url.JoinPath(d.url, "/v1/diagnostics/stream")
+		if err != nil {
+			errCh <- fmt.Errorf("failed to join url path (http): %w", err)
+			return
+		}
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+		if err != nil {
+			errCh <- fmt.Errorf("failed to create stream diagnostics request (http): %w", err)
+			return
+		}
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Accept", "application/json")
+		response, err := d.client.Do(req)
+		if err != nil {
+			errCh <- fmt.Errorf("failed to perform stream diagnostics request (http): %w", err)
+			return
+		}
+		defer response.Body.Close() // nolint:errcheck
+		if response.StatusCode != http.StatusOK {
+			body, _ := io.ReadAll(response.Body)
+			if response.StatusCode == http.StatusNotFound {
+				errCh <- fmt.Errorf("%w: device is not available (http): %s", ErrorNotFound, endpoint)
+				return
+			}
+			errCh <- fmt.Errorf("failed request with status %d (http): %s", response.StatusCode, string(body))
+			return
+		}
+		decoder := json.NewDecoder(response.Body)
+		for {
+			select {
+			case <-ctx.Done():
+				errCh <- ctx.Err()
+				return
+			default:
+				var res devicev1.DiagnosticsResponse
+				if err := decoder.Decode(&res); err != nil {
+					if err == io.EOF {
+						return
+					}
+					errCh <- fmt.Errorf("failed to decode stream diagnostics response (http): %w", err)
+					return
+				}
+				ch <- d.diagnostics(&res)
+			}
+		}
+	}()
+	return ch, errCh
+}
 
 func (d *ClientHttp) UpdateDevice(ctx context.Context, status types.DeviceStatus) error {
 	endpoint, err := url.JoinPath(d.url, "/v1/device")

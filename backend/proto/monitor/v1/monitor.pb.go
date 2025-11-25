@@ -89,6 +89,7 @@ const (
 	DeviceStatus_DEVICE_STATUS_ERROR       DeviceStatus = 3
 	DeviceStatus_DEVICE_STATUS_MAINTENANCE DeviceStatus = 4
 	DeviceStatus_DEVICE_STATUS_BOOTING     DeviceStatus = 5
+	DeviceStatus_DEVICE_STATUS_OFFLINE     DeviceStatus = 6
 )
 
 // Enum value maps for DeviceStatus.
@@ -100,6 +101,7 @@ var (
 		3: "DEVICE_STATUS_ERROR",
 		4: "DEVICE_STATUS_MAINTENANCE",
 		5: "DEVICE_STATUS_BOOTING",
+		6: "DEVICE_STATUS_OFFLINE",
 	}
 	DeviceStatus_value = map[string]int32{
 		"DEVICE_STATUS_UNSPECIFIED": 0,
@@ -108,6 +110,7 @@ var (
 		"DEVICE_STATUS_ERROR":       3,
 		"DEVICE_STATUS_MAINTENANCE": 4,
 		"DEVICE_STATUS_BOOTING":     5,
+		"DEVICE_STATUS_OFFLINE":     6,
 	}
 )
 
@@ -740,14 +743,15 @@ const file_proto_monitor_v1_monitor_proto_rawDesc = "" +
 	"\rPROTOCOL_HTTP\x10\x01\x12\x18\n" +
 	"\x14PROTOCOL_HTTP_STREAM\x10\x02\x12\x11\n" +
 	"\rPROTOCOL_GRPC\x10\x03\x12\x18\n" +
-	"\x14PROTOCOL_GRPC_STREAM\x10\x04*\xb7\x01\n" +
+	"\x14PROTOCOL_GRPC_STREAM\x10\x04*\xd2\x01\n" +
 	"\fDeviceStatus\x12\x1d\n" +
 	"\x19DEVICE_STATUS_UNSPECIFIED\x10\x00\x12\x19\n" +
 	"\x15DEVICE_STATUS_HEALTHY\x10\x01\x12\x1a\n" +
 	"\x16DEVICE_STATUS_DEGRADED\x10\x02\x12\x17\n" +
 	"\x13DEVICE_STATUS_ERROR\x10\x03\x12\x1d\n" +
 	"\x19DEVICE_STATUS_MAINTENANCE\x10\x04\x12\x19\n" +
-	"\x15DEVICE_STATUS_BOOTING\x10\x052\x9e\x05\n" +
+	"\x15DEVICE_STATUS_BOOTING\x10\x05\x12\x19\n" +
+	"\x15DEVICE_STATUS_OFFLINE\x10\x062\x9e\x05\n" +
 	"\aMonitor\x12O\n" +
 	"\tGetHealth\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\"\x12\x82\xd3\xe4\x93\x02\f\x12\n" +
 	"/v1/health\x12{\n" +

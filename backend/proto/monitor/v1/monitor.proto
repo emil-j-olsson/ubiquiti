@@ -57,6 +57,7 @@ enum DeviceStatus {
     DEVICE_STATUS_ERROR = 3;
     DEVICE_STATUS_MAINTENANCE = 4;
     DEVICE_STATUS_BOOTING = 5;
+    DEVICE_STATUS_OFFLINE = 6;
 }
 
 message Device {

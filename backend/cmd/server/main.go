@@ -17,6 +17,7 @@ import (
 	"github.com/emil-j-olsson/ubiquiti/backend/internal/server"
 	"github.com/emil-j-olsson/ubiquiti/backend/internal/service"
 	"github.com/emil-j-olsson/ubiquiti/backend/internal/types"
+	"github.com/emil-j-olsson/ubiquiti/backend/internal/worker"
 	monitorv1 "github.com/emil-j-olsson/ubiquiti/backend/proto/monitor/v1"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/joho/godotenv"
@@ -102,24 +103,16 @@ func run() error {
 	monitorServer := server.NewMonitorServer(monitorService, logger)
 
 	// Worker Lifecycle
+	interval := config.StreamInterval
+	orchestrator := worker.NewOrchestrator(persistence, notifier, factory, interval, logger)
+
 	g, gctx := errgroup.WithContext(ctx)
 	g.Go(func() error {
 		return notifier.Listen(gctx)
 	})
-	// g.Go(func() error {
-	// 	subscriber := notifier.Subscribe(gctx)
-	// 	for {
-	// 		select {
-	// 		case <-gctx.Done():
-	// 			return gctx.Err()
-	// 		case event, ok := <-subscriber:
-	// 			if !ok {
-	// 				return nil
-	// 			}
-	// 			logger.Info("received notification", zap.String("channel", event.Channel), zap.String("payload", event.Payload))
-	// 		}
-	// 	}
-	// })
+	g.Go(func() error {
+		return orchestrator.Run(gctx)
+	})
 
 	// Server Lifecycle
 	g.Go(func() error {

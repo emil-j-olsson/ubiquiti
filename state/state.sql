@@ -13,7 +13,8 @@ create type device_status as enum (
     'DEVICE_STATUS_DEGRADED',
     'DEVICE_STATUS_ERROR',
     'DEVICE_STATUS_MAINTENANCE',
-    'DEVICE_STATUS_BOOTING' 
+    'DEVICE_STATUS_BOOTING',
+    'DEVICE_STATUS_OFFLINE' 
 );
 
 -- Tables
@@ -122,9 +123,9 @@ insert into devices (device_id, alias, host, port, port_gateway, architecture, o
     ('ubiquiti-device-switch-b87f', 'Pro Max 24 PoE', 'ubiquiti-device-switch', 8080, 8081, 'amd64', 'linux', array['PROTOCOL_GRPC_STREAM'::device_protocol]);
 
 -- Dummy data (to be removed later)
-insert into device_diagnostics (device_id, cpu_usage, memory_usage, device_status, hardware_version, software_version, firmware_version, checksum, timestamp) values
-    ((select id from devices where device_id = 'ubiquiti-device-router-3c2d'), 45.2, 62.8, 'DEVICE_STATUS_HEALTHY', 'HW:4.4.6', 'SW:alpine:3.22.2:arm64', 'FW:4.3.20.11298', 'abc123def456', now() - interval '1 hour'),
-    ((select id from devices where device_id = 'ubiquiti-device-router-3c2d'), 52.3, 68.1, 'DEVICE_STATUS_HEALTHY', 'HW:4.4.6', 'SW:alpine:3.22.2:arm64', 'FW:4.3.20.11298', 'abc123def457', now() - interval '30 minutes'),
-    ((select id from devices where device_id = 'ubiquiti-device-router-3c2d'), 38.7, 59.2, 'DEVICE_STATUS_HEALTHY', 'HW:4.4.6', 'SW:alpine:3.22.2:arm64', 'FW:4.3.20.11298', 'abc123def458', now()),
-    ((select id from devices where device_id = 'ubiquiti-device-switch-b87f'), 78.9, 85.3, 'DEVICE_STATUS_DEGRADED', 'HW:2.9.3', 'SW:ubuntu:22.04:amd64', 'FW:5.11.0.11599', 'def789ghi012', now() - interval '2 hours'),
-    ((select id from devices where device_id = 'ubiquiti-device-switch-b87f'), 82.1, 87.6, 'DEVICE_STATUS_ERROR', 'HW:2.9.3', 'SW:ubuntu:22.04:amd64', 'FW:5.11.0.11599', 'def789ghi013', now());
+-- insert into device_diagnostics (device_id, cpu_usage, memory_usage, device_status, hardware_version, software_version, firmware_version, checksum, timestamp) values
+--     ((select id from devices where device_id = 'ubiquiti-device-router-3c2d'), 45.2, 62.8, 'DEVICE_STATUS_HEALTHY', 'HW:4.4.6', 'SW:alpine:3.22.2:arm64', 'FW:4.3.20.11298', 'abc123def456', now() - interval '1 hour'),
+--     ((select id from devices where device_id = 'ubiquiti-device-router-3c2d'), 52.3, 68.1, 'DEVICE_STATUS_HEALTHY', 'HW:4.4.6', 'SW:alpine:3.22.2:arm64', 'FW:4.3.20.11298', 'abc123def457', now() - interval '30 minutes'),
+--     ((select id from devices where device_id = 'ubiquiti-device-router-3c2d'), 38.7, 59.2, 'DEVICE_STATUS_HEALTHY', 'HW:4.4.6', 'SW:alpine:3.22.2:arm64', 'FW:4.3.20.11298', 'abc123def458', now()),
+--     ((select id from devices where device_id = 'ubiquiti-device-switch-b87f'), 78.9, 85.3, 'DEVICE_STATUS_DEGRADED', 'HW:2.9.3', 'SW:ubuntu:22.04:amd64', 'FW:5.11.0.11599', 'def789ghi012', now() - interval '2 hours'),
+--     ((select id from devices where device_id = 'ubiquiti-device-switch-b87f'), 82.1, 87.6, 'DEVICE_STATUS_ERROR', 'HW:2.9.3', 'SW:ubuntu:22.04:amd64', 'FW:5.11.0.11599', 'def789ghi013', now());

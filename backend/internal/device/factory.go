@@ -23,6 +23,8 @@ var (
 
 type Client interface {
 	GetHealth(ctx context.Context) (*types.DeviceHealthStatus, error)
+	GetDiagnostics(ctx context.Context) (*types.DeviceDiagnostics, error)
+	StreamDiagnostics(ctx context.Context) (<-chan *types.DeviceDiagnostics, <-chan error)
 	UpdateDevice(ctx context.Context, status types.DeviceStatus) error
 	Close() error
 }

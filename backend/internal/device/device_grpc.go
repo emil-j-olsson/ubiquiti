@@ -3,6 +3,7 @@ package device
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"github.com/emil-j-olsson/ubiquiti/backend/internal/types"
 	devicev1 "github.com/emil-j-olsson/ubiquiti/device/proto/device/v1"
@@ -62,7 +63,43 @@ func (d *ClientGrpc) GetDiagnostics(ctx context.Context) (*types.DeviceDiagnosti
 	return d.diagnostics(res), nil
 }
 
-// StreamDiagnostics
+func (d *ClientGrpc) StreamDiagnostics(ctx context.Context) (<-chan *types.DeviceDiagnostics, <-chan error) {
+	ch := make(chan *types.DeviceDiagnostics)
+	errCh := make(chan error, 1)
+	go func() {
+		defer close(ch)
+		defer close(errCh)
+		stream, err := d.client.StreamDiagnostics(ctx, &devicev1.DiagnosticsRequest{})
+		if err != nil {
+			if st, ok := status.FromError(err); ok {
+				if st.Code() == codes.NotFound {
+					errCh <- fmt.Errorf("%w: device is not available (grpc): %w", ErrorNotFound, err)
+					return
+				}
+			}
+			errCh <- fmt.Errorf("failed to create diagnostics stream (grpc): %w", err)
+			return
+		}
+		for {
+			select {
+			case <-ctx.Done():
+				errCh <- ctx.Err()
+				return
+			default:
+				res, err := stream.Recv()
+				if err != nil {
+					if err == io.EOF {
+						return
+					}
+					errCh <- fmt.Errorf("failed to receive from diagnostics stream (grpc): %w", err)
+					return
+				}
+				ch <- d.diagnostics(res)
+			}
+		}
+	}()
+	return ch, errCh
+}
 
 func (d *ClientGrpc) UpdateDevice(ctx context.Context, status types.DeviceStatus) error {
 	_, err := d.client.UpdateDevice(ctx, &devicev1.UpdateDeviceRequest{DeviceStatus: status.DeviceProto()})
