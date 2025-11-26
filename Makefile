@@ -29,9 +29,13 @@ lint: $(GOPATH)/bin/golangci-lint
 	golangci-lint run ./device/...
 	golangci-lint run ./backend/...
 
-.PHONY: generate/env generate
+.PHONY: generate/env generate/work generate
 generate/env:
 	cp ./.env.example ./.env
+
+generate/work:
+	cp ./go.work.example ./go.work
+	go work use ./device ./backend
 
 generate:
 	go generate ./device/...

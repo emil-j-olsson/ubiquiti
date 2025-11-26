@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/emil-j-olsson/ubiquiti/device/internal/types"
+	"go.uber.org/zap"
 )
 
 type StateProvider interface {
@@ -13,12 +14,18 @@ type StateProvider interface {
 	UpdateState(fn func(*types.DeviceState)) types.DeviceState
 }
 
-type Service struct {
-	provider StateProvider
+type ChecksumGenerator interface {
+	GenerateChecksum(ctx context.Context, data []byte) (string, error)
 }
 
-func NewDeviceService(provider StateProvider) *Service {
-	return &Service{provider: provider}
+type Service struct {
+	provider StateProvider
+	checksum ChecksumGenerator
+	logger   *zap.Logger
+}
+
+func NewDeviceService(provider StateProvider, checksum ChecksumGenerator, logger *zap.Logger) *Service {
+	return &Service{provider: provider, checksum: checksum, logger: logger}
 }
 
 func (s *Service) GetHealth() *types.HealthStatus {
@@ -32,7 +39,6 @@ func (s *Service) GetHealth() *types.HealthStatus {
 	}
 }
 
-// TODO: get checksum from internal module or external module (binary)
 func (s *Service) GetDiagnostics() *types.Diagnostics {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
@@ -66,6 +72,10 @@ func (s *Service) UpdateDevice(mutation types.DeviceMutation) {
 	})
 }
 
+func (s *Service) GenerateChecksum(ctx context.Context, data []byte) (string, error) {
+	return s.checksum.GenerateChecksum(ctx, data)
+}
+
 func (s *Service) diagnostics(state types.DeviceState) *types.Diagnostics {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
@@ -75,6 +85,5 @@ func (s *Service) diagnostics(state types.DeviceState) *types.Diagnostics {
 		CPU:            m.GCCPUFraction * 100.0,
 		Memory:         float64(m.Alloc) / float64(m.Sys) * 100.0,
 		DeviceStatus:   state.DeviceStatus,
-		Checksum:       "implement-checksum",
 	}
 }

@@ -23,8 +23,8 @@ services:
   ubiquiti-device-router:
     platform: linux/arm64
     build:
-      context: ./device
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./device/Dockerfile
       args:
         BASE_IMAGE: alpine:3.22.2
     container_name: ubiquiti-device-router
@@ -43,8 +43,8 @@ services:
   ubiquiti-device-switch:
     platform: linux/amd64
     build:
-      context: ./device
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./device/Dockerfile
       args:
         BASE_IMAGE: ubuntu:22.04
     container_name: ubiquiti-device-switch
@@ -63,8 +63,8 @@ services:
   ubiquiti-device-access-point:
     platform: linux/arm/v7
     build:
-      context: ./device
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./device/Dockerfile
       args:
         BASE_IMAGE: debian:bullseye-slim
     container_name: ubiquiti-device-access-point

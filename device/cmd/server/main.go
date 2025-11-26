@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/emil-j-olsson/ubiquiti/device/internal/cache"
+	"github.com/emil-j-olsson/ubiquiti/device/internal/checksum"
 	"github.com/emil-j-olsson/ubiquiti/device/internal/logging"
 	"github.com/emil-j-olsson/ubiquiti/device/internal/server"
 	"github.com/emil-j-olsson/ubiquiti/device/internal/service"
@@ -68,9 +69,12 @@ func run() error {
 	)
 	defer cancel()
 
+	// Checksum
+	generator := checksum.NewGenerator(config.ChecksumBinaryPath)
+
 	// Application Layer
 	deviceState := cache.NewDeviceState(config)
-	deviceService := service.NewDeviceService(deviceState)
+	deviceService := service.NewDeviceService(deviceState, generator, logger)
 	deviceServer := server.NewDeviceServer(deviceService, logger)
 
 	// Server Lifecycle
