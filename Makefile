@@ -6,7 +6,7 @@ dev/up:
 	$(DOCKER_COMPOSE_CMD) -f docker-compose.yaml up -d
 
 dev/rebuild:
-	$(DOCKER_COMPOSE_CMD) -f docker-compose.yaml up -d --build
+	$(DOCKER_COMPOSE_CMD) -f docker-compose.yaml up -d --build --remove-orphans
 
 dev/down:
 	$(DOCKER_COMPOSE_CMD) -f docker-compose.yaml down -v
@@ -27,6 +27,7 @@ fmt: $(GOPATH)/bin/goimports $(GOPATH)/bin/golines
 .PHONY: lint
 lint: $(GOPATH)/bin/golangci-lint
 	golangci-lint run ./device/...
+	golangci-lint run ./backend/...
 
 .PHONY: generate/env generate
 generate/env:
@@ -34,6 +35,7 @@ generate/env:
 
 generate:
 	go generate ./device/...
+	go generate ./backend/...
 
 .PHONY: git/hooks
 git/hooks:

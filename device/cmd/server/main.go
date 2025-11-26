@@ -11,10 +11,10 @@ import (
 	"time"
 
 	"github.com/emil-j-olsson/ubiquiti/device/internal/cache"
+	"github.com/emil-j-olsson/ubiquiti/device/internal/logging"
 	"github.com/emil-j-olsson/ubiquiti/device/internal/server"
 	"github.com/emil-j-olsson/ubiquiti/device/internal/service"
 	"github.com/emil-j-olsson/ubiquiti/device/internal/types"
-	"github.com/emil-j-olsson/ubiquiti/device/logging"
 	devicev1 "github.com/emil-j-olsson/ubiquiti/device/proto/device/v1"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/joho/godotenv"
@@ -71,7 +71,7 @@ func run() error {
 	// Application Layer
 	deviceState := cache.NewDeviceState(config)
 	deviceService := service.NewDeviceService(deviceState)
-	deviceServer := server.NewDeviceServer(logger, deviceService)
+	deviceServer := server.NewDeviceServer(deviceService, logger)
 
 	// Server Lifecycle
 	g, gctx := errgroup.WithContext(ctx)
