@@ -97,7 +97,53 @@ func NewWorkerStream(
 }
 
 func (w *WorkerStream) Run(ctx context.Context) error {
-	// TODO: implement diagnostics streaming (stream stragegy; define externally – inject function)
-	time.Sleep(time.Second * 50000)
-	return nil
+	port := *w.device.Port
+	if w.protocol.IsHttp() {
+		port = *w.device.GatewayPort
+	}
+	deviceID := *w.device.Identifier
+	config := DefaultStreamingConfig()
+	streamFunc := func(ctx context.Context, messageCh chan<- struct{}) error {
+		client, err := w.provider.CreateClient(device.Config{
+			Protocol: w.protocol,
+			Host:     *w.device.Host,
+			Port:     port,
+		})
+		if err != nil {
+			return fmt.Errorf("failed to create client (%s): %w", w.protocol.String(), err)
+		}
+		defer client.Close() //nolint:errcheck
+		diagCh, errCh := client.StreamDiagnostics(ctx)
+		for {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case err := <-errCh:
+				if err != nil {
+					return fmt.Errorf("stream error: %w", err)
+				}
+				return nil
+			case diagnostics, ok := <-diagCh:
+				if !ok {
+					return fmt.Errorf("stream closed unexpectedly")
+				}
+				if err := w.persistence.SaveDiagnostics(ctx, *diagnostics); err != nil {
+					continue
+				}
+				// Signal message received for heartbeat
+				select {
+				case messageCh <- struct{}{}:
+				default:
+				}
+			}
+		}
+	}
+	errorFunc := func(ctx context.Context) error {
+		return w.persistence.SaveDiagnostics(ctx, types.DeviceDiagnostics{
+			Identifier:   deviceID,
+			DeviceStatus: types.DeviceStatusOffline,
+			Timestamp:    time.Now(),
+		})
+	}
+	return NewStreamingStrategy(config, streamFunc, errorFunc, w.logger).Run(ctx)
 }
