@@ -29,6 +29,7 @@ type Provider interface {
 	GetDiagnostics() *types.Diagnostics
 	StreamDiagnostics(context.Context) <-chan *types.Diagnostics
 	UpdateDevice(types.DeviceMutation)
+	GenerateChecksum(ctx context.Context, data []byte) (string, error)
 }
 
 type Server struct {
@@ -73,7 +74,7 @@ func (s *Server) GetDiagnostics(
 	_, cancel := context.WithTimeout(ctx, DefaultContextTimeout)
 	defer cancel()
 	diagnostics := s.provider.GetDiagnostics()
-	return s.diagnostics(diagnostics), nil
+	return s.diagnostics(ctx, diagnostics), nil
 }
 
 func (s *Server) StreamDiagnostics(
@@ -82,7 +83,7 @@ func (s *Server) StreamDiagnostics(
 ) error {
 	ch := s.provider.StreamDiagnostics(stream.Context())
 	for diagnostics := range ch {
-		response := s.diagnostics(diagnostics)
+		response := s.diagnostics(stream.Context(), diagnostics)
 		if err := stream.Send(response); err != nil {
 			s.logger.Error(ErrorSendStream.Error(), zap.Error(err))
 			return status.Error(codes.Internal, err.Error())
@@ -106,8 +107,8 @@ func (s *Server) UpdateDevice(
 	return &devicev1.UpdateDeviceResponse{}, nil
 }
 
-func (s *Server) diagnostics(diag *types.Diagnostics) *devicev1.DiagnosticsResponse {
-	return &devicev1.DiagnosticsResponse{
+func (s *Server) diagnostics(ctx context.Context, diag *types.Diagnostics) *devicev1.DiagnosticsResponse {
+	res := &devicev1.DiagnosticsResponse{
 		DeviceId:        diag.Identifier,
 		HardwareVersion: diag.DeviceVersions.Hardware,
 		SoftwareVersion: diag.DeviceVersions.Software,
@@ -118,4 +119,6 @@ func (s *Server) diagnostics(diag *types.Diagnostics) *devicev1.DiagnosticsRespo
 		Checksum:        diag.Checksum,
 		Timestamp:       timestamppb.Now(),
 	}
+	res.Checksum = res.GenerateChecksum(ctx, s.provider)
+	return res
 }

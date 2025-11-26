@@ -11,6 +11,9 @@
 # Output of the go coverage tool
 *.out
 
+# Bin dictionaries
+bin/
+
 # Go workspace file
 go.work
 go.work.sum
