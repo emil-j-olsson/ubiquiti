@@ -1,0 +1,43 @@
+name: Test services pipeline
+on: 
+  workflow_call:
+    inputs:
+      go_version:
+        required: false
+        type: string
+        default: "1.24"
+        description: Golang version
+jobs:
+  test-services:
+    name: Test services
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install Golang
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ inputs.go_version }}
+
+      - name: Install Gotest
+        run: go install github.com/rakyll/gotest@latest
+
+      - name: Generate .env
+        run: make generate/env
+
+      - name: Generate go.work
+        run: make generate/work
+
+      - name: Setup environment
+        run: make dev/up
+
+      - name: Service health check
+        run: make wait/healthy
+
+      - name: Run tests
+        run: make test/ci
+
+      - name: Teardown environment
+        run: make dev/down
+        if: always()

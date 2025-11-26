@@ -6,20 +6,21 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
+const DefaultInvalidChecksum = "invalid-checksum"
+
 type generator interface {
 	GenerateChecksum(ctx context.Context, data []byte) (string, error)
 }
 
 func (r *DiagnosticsResponse) GenerateChecksum(ctx context.Context, gen generator) string {
-	invalid := "invalid-checksum"
 	r.Checksum = ""
 	data, err := protojson.Marshal(r)
 	if err != nil {
-		return invalid
+		return DefaultInvalidChecksum
 	}
 	checksum, err := gen.GenerateChecksum(ctx, data)
 	if err != nil {
-		return invalid
+		return DefaultInvalidChecksum
 	}
 	return checksum
 }

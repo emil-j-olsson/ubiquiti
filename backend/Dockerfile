@@ -10,8 +10,6 @@ WORKDIR /workspace
 
 RUN apk add --no-cache git make
 
-COPY go.work go.work.sum* ./
-
 COPY checksum/ ./checksum/
 
 COPY device/go.mod device/go.sum ./device/

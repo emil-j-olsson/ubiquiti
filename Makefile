@@ -1,7 +1,9 @@
 GO_TEST_CMD := $(if $(shell which gotest), gotest, go test)
 DOCKER_COMPOSE_CMD := $(if $(shell PATH=$(PATH) command -v docker-compose), docker-compose, docker compose)
 
-.PHONY: dev/up dev/rebuild dev/down dev/logs
+.PHONY: dev dev/up dev/rebuild dev/down dev/logs
+dev: dev/up
+
 dev/up:
 	$(DOCKER_COMPOSE_CMD) -f docker-compose.yaml up -d
 
@@ -13,6 +15,21 @@ dev/down:
 
 dev/logs:
 	$(DOCKER_COMPOSE_CMD) -f docker-compose.yaml logs -f
+
+.PHONY: test test/ci test/unit
+TEST_OPTS ?= -cover -timeout=90s
+test: dev/up wait/healthy
+	$(GO_TEST_CMD) $(TEST_OPTS) ./test/...
+
+test/ci:
+	$(GO_TEST_CMD) -v $(TEST_OPTS) ./test/...
+
+test/unit:
+	$(GO_TEST_CMD) $(TEST_OPTS) ./device/... ./backend/...
+
+.PHONY: wait/healthy
+wait/healthy:
+	@i=0; while [ $$i -lt 30 ] && ! $(DOCKER_COMPOSE_CMD) ps ubiquiti-postgres --format json | grep -q '"Health":"healthy"'; do sleep 2; i=$$((i+1)); done
 
 .PHONY: fmt/global fmt
 fmt/global: $(GOPATH)/bin/goimports $(GOPATH)/bin/golines
@@ -28,6 +45,7 @@ fmt: $(GOPATH)/bin/goimports $(GOPATH)/bin/golines
 lint: $(GOPATH)/bin/golangci-lint
 	golangci-lint run ./device/...
 	golangci-lint run ./backend/...
+	golangci-lint run ./test/...
 
 .PHONY: generate/env generate/work generate
 generate/env:
@@ -35,11 +53,12 @@ generate/env:
 
 generate/work:
 	cp ./go.work.example ./go.work
-	go work use ./device ./backend
+	go work use ./device ./backend ./checksum ./test
 
 generate:
 	go generate ./device/...
 	go generate ./backend/...
+	go generate ./test/...
 
 .PHONY: git/hooks
 git/hooks:
