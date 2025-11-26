@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/emil-j-olsson/ubiquiti/backend/internal/checksum"
 	"github.com/emil-j-olsson/ubiquiti/backend/internal/database"
 	"github.com/emil-j-olsson/ubiquiti/backend/internal/database/postgres"
 	"github.com/emil-j-olsson/ubiquiti/backend/internal/device"
@@ -71,6 +72,9 @@ func run() error {
 	)
 	defer cancel()
 
+	// Checksum
+	generator := checksum.NewGenerator(config.ChecksumBinaryPath)
+
 	// Persistence Layer
 	model, err := database.NewDatabaseModel(ctx, logger).AddDatabaseConnections(
 		database.Config{
@@ -96,7 +100,7 @@ func run() error {
 	notifier := postgres.NewNotifier(pool, config.Persistence.Postgres.NotificationChannel, logger)
 
 	// External Clients
-	factory := device.NewClientFactory()
+	factory := device.NewClientFactory(generator)
 
 	// Application Layer
 	monitorService := service.NewMonitorService(persistence, factory, config, logger)

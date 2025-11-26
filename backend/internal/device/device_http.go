@@ -16,12 +16,13 @@ import (
 
 // Device Client (HTTP)
 type ClientHttp struct {
-	url    string
-	client *http.Client
-	config Config
+	url       string
+	client    *http.Client
+	config    Config
+	generator ChecksumGenerator
 }
 
-func NewClientHttp(config Config) *ClientHttp {
+func NewClientHttp(config Config, generator ChecksumGenerator) *ClientHttp {
 	url := fmt.Sprintf("http://%s:%d", config.Host, config.Port)
 	return &ClientHttp{
 		url: url,
@@ -31,7 +32,8 @@ func NewClientHttp(config Config) *ClientHttp {
 				IdleConnTimeout: DefaultClientIdleTimeout,
 			},
 		},
-		config: config,
+		config:    config,
+		generator: generator,
 	}
 }
 
@@ -102,7 +104,7 @@ func (d *ClientHttp) GetDiagnostics(ctx context.Context) (*types.DeviceDiagnosti
 	if err := protojson.Unmarshal(body, &res); err != nil {
 		return nil, fmt.Errorf("failed to decode diagnostics response (http): %w", err)
 	}
-	return d.diagnostics(&res), nil
+	return d.diagnostics(ctx, &res), nil
 }
 
 func (d *ClientHttp) StreamDiagnostics(ctx context.Context) (<-chan *types.DeviceDiagnostics, <-chan error) {
@@ -153,7 +155,7 @@ func (d *ClientHttp) StreamDiagnostics(ctx context.Context) (<-chan *types.Devic
 					errCh <- fmt.Errorf("failed to decode stream diagnostics response (http): %w", err)
 					return
 				}
-				ch <- d.diagnostics(&res)
+				ch <- d.diagnostics(ctx, &res)
 			}
 		}
 	}()
@@ -192,7 +194,15 @@ func (d *ClientHttp) Close() error {
 	return nil
 }
 
-func (d *ClientHttp) diagnostics(diag *devicev1.DiagnosticsResponse) *types.DeviceDiagnostics {
+func (d *ClientHttp) diagnostics(
+	ctx context.Context,
+	diag *devicev1.DiagnosticsResponse,
+) *types.DeviceDiagnostics {
+	checksum := diag.Checksum
+	comparison := diag.GenerateChecksum(ctx, d.generator)
+	if checksum != comparison {
+		diag.Checksum = "invalid-checksum"
+	}
 	return &types.DeviceDiagnostics{
 		Identifier: diag.DeviceId,
 		DeviceVersions: types.DeviceVersions{
@@ -203,7 +213,7 @@ func (d *ClientHttp) diagnostics(diag *devicev1.DiagnosticsResponse) *types.Devi
 		CPU:          diag.CpuUsage,
 		Memory:       diag.MemoryUsage,
 		DeviceStatus: types.DeviceStatusFromString(diag.DeviceStatus.String()),
-		Checksum:     diag.Checksum,
+		Checksum:     checksum,
 		Timestamp:    diag.Timestamp.AsTime(),
 	}
 }

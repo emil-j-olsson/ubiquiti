@@ -12,6 +12,7 @@ type generator interface {
 
 func (r *DiagnosticsResponse) GenerateChecksum(ctx context.Context, gen generator) string {
 	invalid := "invalid-checksum"
+	r.Checksum = ""
 	data, err := protojson.Marshal(r)
 	if err != nil {
 		return invalid

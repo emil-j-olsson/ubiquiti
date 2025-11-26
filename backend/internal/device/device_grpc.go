@@ -15,12 +15,13 @@ import (
 
 // Device Client (gRPC)
 type ClientGrpc struct {
-	conn   *grpc.ClientConn
-	client devicev1.DeviceClient
-	config Config
+	conn      *grpc.ClientConn
+	client    devicev1.DeviceClient
+	config    Config
+	generator ChecksumGenerator
 }
 
-func NewClientGrpc(config Config) (*ClientGrpc, error) {
+func NewClientGrpc(config Config, generator ChecksumGenerator) (*ClientGrpc, error) {
 	endpoint := fmt.Sprintf("%s:%d", config.Host, config.Port)
 	conn, err := grpc.NewClient(
 		endpoint,
@@ -30,9 +31,10 @@ func NewClientGrpc(config Config) (*ClientGrpc, error) {
 		return nil, fmt.Errorf("%w (grpc): %w", ErrorClientCreation, err)
 	}
 	return &ClientGrpc{
-		conn:   conn,
-		client: devicev1.NewDeviceClient(conn),
-		config: config,
+		conn:      conn,
+		client:    devicev1.NewDeviceClient(conn),
+		config:    config,
+		generator: generator,
 	}, nil
 }
 
@@ -60,7 +62,7 @@ func (d *ClientGrpc) GetDiagnostics(ctx context.Context) (*types.DeviceDiagnosti
 	if err != nil {
 		return nil, fmt.Errorf("failed to perform diagnostics request (grpc): %w", err)
 	}
-	return d.diagnostics(res), nil
+	return d.diagnostics(ctx, res), nil
 }
 
 func (d *ClientGrpc) StreamDiagnostics(ctx context.Context) (<-chan *types.DeviceDiagnostics, <-chan error) {
@@ -94,7 +96,7 @@ func (d *ClientGrpc) StreamDiagnostics(ctx context.Context) (<-chan *types.Devic
 					errCh <- fmt.Errorf("failed to receive from diagnostics stream (grpc): %w", err)
 					return
 				}
-				ch <- d.diagnostics(res)
+				ch <- d.diagnostics(ctx, res)
 			}
 		}
 	}()
@@ -116,7 +118,15 @@ func (d *ClientGrpc) Close() error {
 	return nil
 }
 
-func (d *ClientGrpc) diagnostics(diag *devicev1.DiagnosticsResponse) *types.DeviceDiagnostics {
+func (d *ClientGrpc) diagnostics(
+	ctx context.Context,
+	diag *devicev1.DiagnosticsResponse,
+) *types.DeviceDiagnostics {
+	checksum := diag.Checksum
+	comparison := diag.GenerateChecksum(ctx, d.generator)
+	if checksum != comparison {
+		diag.Checksum = "invalid-checksum"
+	}
 	return &types.DeviceDiagnostics{
 		Identifier: diag.DeviceId,
 		DeviceVersions: types.DeviceVersions{
@@ -127,7 +137,7 @@ func (d *ClientGrpc) diagnostics(diag *devicev1.DiagnosticsResponse) *types.Devi
 		CPU:          diag.CpuUsage,
 		Memory:       diag.MemoryUsage,
 		DeviceStatus: types.DeviceStatusFromString(diag.DeviceStatus.String()),
-		Checksum:     diag.Checksum,
+		Checksum:     checksum,
 		Timestamp:    diag.Timestamp.AsTime(),
 	}
 }

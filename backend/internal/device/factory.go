@@ -29,6 +29,10 @@ type Client interface {
 	Close() error
 }
 
+type ChecksumGenerator interface {
+	GenerateChecksum(ctx context.Context, data []byte) (string, error)
+}
+
 type Config struct {
 	Protocol types.Protocol
 	Host     string
@@ -36,18 +40,20 @@ type Config struct {
 }
 
 // Device Client Factory
-type factory struct{}
+type factory struct {
+	generator ChecksumGenerator
+}
 
-func NewClientFactory() *factory {
-	return &factory{}
+func NewClientFactory(generator ChecksumGenerator) *factory {
+	return &factory{generator: generator}
 }
 
 func (f *factory) CreateClient(config Config) (Client, error) {
 	if config.Protocol.IsGrpc() {
-		return NewClientGrpc(config)
+		return NewClientGrpc(config, f.generator)
 	}
 	if config.Protocol.IsHttp() {
-		return NewClientHttp(config), nil
+		return NewClientHttp(config, f.generator), nil
 	}
 	return nil, fmt.Errorf("%w: %s", ErrorUnsupportedProtocol, config.Protocol.String())
 }

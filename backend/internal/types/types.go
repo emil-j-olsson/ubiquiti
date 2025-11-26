@@ -17,15 +17,16 @@ var (
 )
 
 type Config struct {
-	Environment    Environment   `envconfig:"ENVIRONMENT"     default:"development"`
-	LogLevel       string        `envconfig:"LOG_LEVEL"       default:"info"`
-	LogFormat      string        `envconfig:"LOG_FORMAT"      default:"json"`
-	Port           int           `envconfig:"PORT"            default:"8080"`
-	GatewayPort    int           `envconfig:"GATEWAY_PORT"    default:"8081"`
-	GatewayHost    string        `envconfig:"GATEWAY_HOST"    default:"localhost"`
-	Identifier     string        `envconfig:"IDENTIFIER"      default:"monitor-001"`
-	StreamInterval time.Duration `envconfig:"STREAM_INTERVAL" default:"500ms"`
-	Persistence    Persistence   `envconfig:"PERSISTENCE"`
+	Environment        Environment   `envconfig:"ENVIRONMENT"          default:"development"`
+	LogLevel           string        `envconfig:"LOG_LEVEL"            default:"info"`
+	LogFormat          string        `envconfig:"LOG_FORMAT"           default:"json"`
+	Port               int           `envconfig:"PORT"                 default:"8080"`
+	GatewayPort        int           `envconfig:"GATEWAY_PORT"         default:"8081"`
+	GatewayHost        string        `envconfig:"GATEWAY_HOST"         default:"localhost"`
+	Identifier         string        `envconfig:"IDENTIFIER"           default:"monitor-001"`
+	StreamInterval     time.Duration `envconfig:"STREAM_INTERVAL"      default:"500ms"`
+	ChecksumBinaryPath string        `envconfig:"CHECKSUM_BINARY_PATH" default:"/usr/local/bin/checksum"`
+	Persistence        Persistence   `envconfig:"PERSISTENCE"`
 }
 
 type Persistence struct {
