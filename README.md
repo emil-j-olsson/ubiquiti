@@ -4,7 +4,7 @@
 
 
 <p align="center">
-  <img src="./assets/header.gif" alt="Demo" style="border-radius: 10px;" />
+  <img src="./assets/header.gif" alt="Demo" width="800px" style="border-radius: 10px;" />
 </p>
 
 Network device monitoring service that continuously retrieve diagnostics over a network via various supported protocols (`gRPC`, `HTTP`) and operating systems (`alpine (arm64)`, `ubuntu (amd64)`, `debian (armv7)`).
