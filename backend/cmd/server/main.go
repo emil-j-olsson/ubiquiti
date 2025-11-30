@@ -165,7 +165,7 @@ func startGateway(ctx context.Context, config types.Config, logger *zap.Logger) 
 	}
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.GatewayPort),
-		Handler: mux,
+		Handler: server.CORSMiddleware(mux),
 	}
 	logger.Info("server started (gateway)", zap.Int("port", config.GatewayPort))
 

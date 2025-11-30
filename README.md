@@ -2,6 +2,10 @@
 
 [![Verify and test services](https://github.com/emil-j-olsson/ubiquiti/actions/workflows/on-pr.yaml/badge.svg)](https://github.com/emil-j-olsson/ubiquiti/actions/workflows/on-pr.yaml)
 
+<p align="center">
+  <img src="./assets/header.gif" alt="Demo" width="680px" />
+</p>
+
 Network device monitoring service that continuously retrieve diagnostics over a network via various supported protocols (`gRPC`, `HTTP`) and operating systems (`alpine (arm64)`, `ubuntu (amd64)`, `debian (armv7)`).
 
 ## Architecture
@@ -105,6 +109,7 @@ This monorepo contains several services and components listed below:
 
 - [Device](device/): Network device service that exposes health status and diagnostics data via gRPC and HTTP APIs, supporting multiple protocols and platforms.
 - [Monitor](backend/): Backend monitoring service that collects and persists device diagnostics from the network, manages device registration, and provides real-time data streaming capabilities.
+- [Frontend](frontend/): Frontend monitoring service for visualizing network device health, diagnostics, and real-time monitoring data from Ubiquiti devices.
 - [Checksum](checksum/): Lightweight SHA-256 checksum utility for generating deterministic cryptographic hashes from streaming data, used for data integrity verification between services.
 
 View the specifics of each service e.g. endpoint documentation by following the links.

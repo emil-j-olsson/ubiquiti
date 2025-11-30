@@ -4,6 +4,8 @@
 *.dll
 *.so
 *.dylib
+.DS_Store
+Thumbs.db
 
 # Test binary, built with `go test -c`
 *.test
@@ -20,3 +22,16 @@ go.work.sum
 
 # Environment file
 .env
+
+# Svelte
+node_modules
+.output
+.vercel
+.netlify
+.wrangler
+.svelte-kit
+build/
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
