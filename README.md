@@ -2,9 +2,8 @@
 
 [![Verify and test services](https://github.com/emil-j-olsson/ubiquiti/actions/workflows/on-pr.yaml/badge.svg)](https://github.com/emil-j-olsson/ubiquiti/actions/workflows/on-pr.yaml)
 
-
 <p align="center">
-  <img src="./assets/header.gif" alt="Demo" width="800px" style="border-radius: 10px;" />
+  <img src="./assets/header.gif" alt="Demo" width="680px" />
 </p>
 
 Network device monitoring service that continuously retrieve diagnostics over a network via various supported protocols (`gRPC`, `HTTP`) and operating systems (`alpine (arm64)`, `ubuntu (amd64)`, `debian (armv7)`).
