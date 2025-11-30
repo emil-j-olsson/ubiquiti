@@ -132,6 +132,24 @@ services:
     networks:
       - ubiquiti-network
 
+  ubiquiti-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ubiquiti-frontend
+    environment:
+      - NODE_ENV=production
+      - ORIGIN=http://localhost:3000
+    depends_on:
+      ubiquiti-monitor-arm:
+        condition: service_started
+      ubiquiti-monitor-amd:
+        condition: service_started
+    ports:
+      - 3000:3000
+    networks:
+      - ubiquiti-network
+
 networks:
   ubiquiti-network:
     driver: bridge
